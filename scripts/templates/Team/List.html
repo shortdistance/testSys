@@ -1,0 +1,61 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li class="active"><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-panel am-panel-primary ng-cloak" ng-controller="TeamCtrl" ng-init="ProjectId=((ProjectId));GetMemberCandidate();GetMemberInProject();Creator=((Creator));CurrentUser=((CurrentUser))">
+    <div class="am-panel-hd"><i class="am-icon-users"></i>项目团队</div>
+    <div class="am-panel-bd">
+        <form class="am-form-inline" role="form" ng-show="Creator==CurrentUser">
+            <div class="am-form-group am-form-icon">
+                <i class="am-icon-user"></i>
+                <input type="text" class="am-form-field" ng-model="Word" placeholder="请输入待添加成员的电子邮件/昵称" />
+                <i class="am-icon-search"></i>
+            </div>
+            <div class="notice notice-info row" ng-show="(MemberCandidate | filter:Word).length>0 && Word.length>0">
+                <div ng-repeat="Member in MemberCandidate | filter:Word">
+                    <div class="am-u-sm-6 am-u-md-4 am-u-lg-3">
+                        <div class="am-panel am-panel-default">
+                            <div class="am-panel-bd am-text-center">
+                                <p>
+                                    <strong>{{Member.Nick}}</strong>
+                                </p>
+                                <p class="text-muted">{{Member.Email}}</p>
+                                <p>
+                                    <button type="button" class="am-btn am-btn-success" ng-click="AddMember(Member.Email)"><i class="am-icon-plus"></i>添加</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="am-panel am-panel-default">
+            <div class="am-panel-bd">
+                <div class="row">
+                    <div ng-repeat="Member in MemberList">
+                        <div class="am-u-sm-6 am-u-md-4 am-u-lg-3">
+                            <div class="am-panel am-panel-default">
+                                <div class="am-panel-bd am-text-center">
+                                    <p>
+                                        <strong>{{Member.Nick}}</strong>
+                                    </p>
+                                    <p class="text-muted">{{Member.Email}}</p>
+                                    <p>
+                                        <button ng-show="Creator==CurrentUser" type="button" ng-disabled="Creator==Member.UserId" class="am-btn am-btn-danger" ng-click="RemoveMember(Member.UserId)"><i class="am-icon-trash-o"></i>移除</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

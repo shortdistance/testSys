@@ -1,0 +1,367 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((Task.ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((Task.ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li class="active"><a href="/Project/Task/((Task.ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li><a href="/Project/Case/((Task.ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((Task.ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((Task.ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+	<div class="am-panel am-panel-primary ng-cloak" ng-controller="TaskUpdateCtrl" ng-init="Task.TaskId='((Task.TaskId))';queryInit();UserId=((session['userid']));GetLatestWaveHistory();">
+		<div class="am-panel-hd"><strong><i class="am-icon-info"></i>任务信息</strong></div>
+		<div class="am-panel-bd">
+			<div ng-show="!ShowUpdate">
+				<table class="am-table am-table-bordered ">
+				    <tbody>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>任务标题:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">{{Task.TaskName}}</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>任务类型:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<span ng-show="Task.TaskType==1">默认</span>
+								<span ng-show="Task.TaskType==2">测试-手动</span>
+								<span ng-show="Task.TaskType==3">测试-自动化</span>
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>任务优先级:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<span ng-switch on="Task.Priority" class="text-right">
+									<strong class="label label-danger" ng-switch-when="1">高</strong>
+									<strong class="label label-Primary" ng-switch-when="2">中</strong>
+									<strong class="label label-default" ng-switch-when="3">低</strong>
+								</span>
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>任务进度:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+                                <strong>{{Task.Progress}}%</strong>
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>创建人:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{Task.Creator}}
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>创建时间:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{Task.CreateDate}}
+							</td>
+						</tr>	
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>处理人:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{Task.AssignToNick}}
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最近更新:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{Task.LastUpdateDate}}
+							</td>
+						</tr>							
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>任务状态:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<span ng-switch on="Task.Status" class="text-right">
+									<strong class="label label-info" ng-switch-when="1">新创建</strong>
+									<strong class="label label-primary" ng-switch-when="2">进行中</strong>
+									<strong class="label label-success" ng-switch-when="3">已完成</strong>
+									<strong class="label label-default" ng-switch-when="4">已取消</strong>
+								</span>
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>工作量:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{Task.Effort}}小时
+							</td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>详细描述:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" ng-bind-html="Task.Description | trustHtml" ></td>
+						</tr>
+						<tr>
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>操作:</strong></td>
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" >
+							   <div class="am-btn-toolbar">
+									<div class="am-btn-group am-btn-group-xs">
+										<button type="button" class="am-btn am-btn-xs am-btn-primary" ng-click="edit();"><span class="am-icon-copy"></span>编辑</button>
+										{% if Task.Creator==CurrentUser %}
+										<button type="button" id="btnDelete" class="am-btn am-btn-danger" data-loading-text="正在删除" ng-click="Delete()"><i class="am-icon-trash-o"></i>删除</button>
+										{% else %}
+										<button type="button" id="btnDelete" class="am-btn am-btn-danger" disabled="disabled"><i class="am-icon-trash-o"></i>删除-{{Task.Creator}}</button>
+										{% endif %}
+										<button class="am-btn am-btn-warning am-btn-xs" ng-click="RunAllScript();"><span class="am-icon-circle-o-notch"></span>执行全部</button>
+										<a href="/Project/Task/((Task.ProjectId))" class="am-btn am-btn-xs am-btn-default"><span class="am-icon-pencil-square-o"></span>返回</a>
+									</div>
+							   </div>							
+							</td>
+						</tr>	
+						
+						<tr ng-show="Task.TaskType==2||Task.TaskType==3">
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>关联用例列表:</strong></td>							
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" >
+								<div class="am-panel-group" id="accordion">
+									<div class="am-panel am-panel-default" ng-repeat="Case in TaskQueryCaseList" ng-show="Case.IsChecked" >
+										<div class="am-panel-hd" data-am-collapse="{parent: '#accordion', target: '#{{Case.CaseId}}'}">
+											<table class="am-table">
+												<tbody>
+													<tr>
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">
+															<span class="am-icon-suitcase am-text-primary"><a href="/Case/Detail/((Task.ProjectId))_{{Case.CaseId}}">{{Case.CaseId}}</a></span>
+														</td>
+														<td class="am-u-sm-3 am-u-md-3 am-u-lg-3">
+															<span ng-switch on="Case.Result" class="am-text-left">
+																<strong class="label label-info" ng-switch-when="0">未执行</strong>
+																<strong class="label label-success" ng-switch-when="1">成功</strong>
+																<strong class="label label-danger" ng-switch-when="2">失败</strong>
+																<strong class="label label-default" ng-switch-when="3">无法执行</strong>
+															</span>
+															<span ng-switch on="{{Case.CaseType}}">
+																<strong  class="label label-info" ng-switch-when="1">手动</strong>
+																<strong  class="label label-danger" ng-switch-when="2">自动化</strong>
+															</span>	
+														</td>
+														<td class="am-u-sm-6 am-u-md-6 am-u-lg-6">
+															<a href="/Case/Detail/((Task.ProjectId))_{{Case.CaseId}}" class="am-text-left">{{ Case.Subject | limitTo : 48 }}</a>
+														</td>
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">
+															<button class="am-btn am-btn-warning am-btn-xs" ng-click="RunScriptNew(Case);" ng-show="Task.TaskType==3"><span class="am-icon-circle-o-notch"></span>执行</button>
+														</td>
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1" ng-show="Task.TaskType==2">
+															<i class="am-icon-plus"></i>展开
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div id="{{Case.CaseId}}" class="am-panel-collapse am-collapse">
+											<div class="am-panel-bd" ng-show="Task.TaskType==2">
+												<div class="am-alert am-alert-success am-alert-dismissable" ng-show="Case.IsExecuteSucc">
+													<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+													<strong>用例执行成功!</strong>
+												</div>
+												<div class="am-alert am-alert-danger am-alert-dismissable" ng-show="Case.IsExecuteFail">
+													<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+													<strong>用例执行失败!</strong>
+												</div>
+												<div class="am-alert am-alert-warning am-alert-dismissable" ng-show="Case.IsCantExecute">
+													<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+													<strong>用例不能执行!</strong>
+												</div>
+												<table class="am-table">
+													<tbody>
+														<tr>
+														  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>前置条件:</strong></td>
+														  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" ng-bind-html="Case.PreCondition | trustHtml"></td>
+														</tr>
+														<tr>
+														  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>测试步骤:</strong></td>
+														  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" ng-bind-html="Case.TestSteps | trustHtml"></td>
+														</tr>
+														<tr>
+														  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>期望结果:</strong></td>
+														  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" ng-bind-html="Case.ExpectedResult | trustHtml"></td>
+														</tr>					
+														<tr>
+															<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>执行用例:</strong></td>
+															<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+																<div class="am-btn-group am-btn-group-xs">
+																	<button type="button" id="btnExecutePass" class="am-btn am-btn-xs am-btn-success" ng-click="Case.Result=1;Case.NotExecutePass=false;Case.IsExecuteSucc=true;Case.IsExecuteFail=false;Case.IsCantExecute=false;ExecutePass(Case);" data-am-button><span class="am-icon-check"></span>执行通过</button>
+																	<button type="button" id="btnExecuteFail" class="am-btn am-btn-xs am-btn-danger" ng-click="Case.Result=2;Case.NotExecutePass=true;Case.IsExecuteSucc=false;Case.IsExecuteFail=true;Case.IsCantExecute=false;" data-am-button><span class="am-icon-close"></span>执行失败</button>
+																	<button type="button" id="btnCantExecute" class="am-btn am-btn-xs am-btn-default" ng-click="Case.Result=3;Case.NotExecutePass=true;Case.IsExecuteSucc=false;Case.IsExecuteFail=false;Case.IsCantExecute=true;" data-am-button><span class="am-icon-lock"></span>不能执行</button>
+																</div>
+																<div ng-show="Case.NotExecutePass" >
+																	<hr />
+																	<div class="am-form-group">
+																		<label for="TestData_{{Case.CaseId}}" >测试数据：</label>
+																		<textarea name="TestData_{{Case.CaseId}}" id="TestData_{{Case.CaseId}}"  class="textarea" ng-model="Case.TestData" placeholder="测试数据" required minlength=1></textarea>
+																		<hr />
+																	</div>
+																	<div class="am-form-group">
+																		<label for="BackupInfo_{{Case.CaseId}}" >结果说明：</label>
+																		<textarea name="BackupInfo_{{Case.CaseId}}" id="BackupInfo_{{Case.CaseId}}" class="textarea" ng-model="Case.BackupInfo" placeholder="结果说明" required minlength=1></textarea>
+																		<hr />
+																	</div>
+																	<div class="am-checkbox">
+																		<label>
+																			<input type="checkbox" ng-model="Case.IsNeedCreateBug" ng-checked="Case.IsNeedCreateBug"> <strong><i>自动创建新一个BUG??</i></strong>
+																		</label>
+																	</div>
+																	<p>
+																		<button id="btnExecuteInfoSubmit_{{Case.CaseId}}" class="am-btn am-btn-xs am-btn-primary" ng-click="CreateIssue(Case);CantExecutePass(Case);" >提交</button>
+																		<a type="button" class="am-btn am-btn-xs am-btn-default" ng-click="Case.NotExecutePass=false;Case.TestData='';Case.Attachment='';Case.BackupInfo='';" >返回</a>
+																	</p>
+																</div>								
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr ng-show="Task.TaskType==3">
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最新执行批次号:</strong></td>							
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" >{{LatestWaveId}}</td>						
+						</tr>
+						<tr ng-show="Task.TaskType==3">
+						    <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最近批次结果:</strong></td>							
+						    <td class="am-u-sm-8 am-u-md-9 am-u-lg-10" >
+								<div class="am-panel am-panel-default" ng-repeat="waveinfo in RetWaveInfo" >
+									<div class="am-panel-hd" data-am-collapse="{parent: '#accordion', target: '#history_{{waveinfo.CaseId}}'}">
+										<table class="am-table">
+											<tr>
+												<td class="am-u-sm-3 am-u-md-3 am-u-lg-3">
+													<span class="am-icon-suitcase am-text-primary"><a href="/Case/Detail/((Task.ProjectId))_{{waveinfo.CaseId}}">{{waveinfo.CaseId}}</a></span>
+												</td>
+												<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" class="am-text-left">
+													执行结果:
+													<span ng-switch on="waveinfo.IsPass">
+														<strong class="label label-success" ng-switch-when="true">成功</strong>
+														<strong class="label label-danger" ng-switch-when="false">失败</strong>
+													</span>
+												</td>
+												<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left"><strong>返回码:</strong>{{waveinfo.RetCode}}</a></td>
+												<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left"><strong>执行人:</strong>{{waveinfo.Runner}}</a></td>
+											</tr>
+										</table>								
+									</div>
+									<div id="history_{{waveinfo.CaseId}}" class="am-panel-collapse am-collapse" >
+										<div class="am-panel-bd">
+											<table class="am-table">
+												<thead>
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>StepId</strong></td>
+													<td class="am-u-sm-4 am-u-md-4 am-u-lg-4"><strong>Url</strong></td>
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>方式</strong></td>
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>返回码</strong></td>
+													<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><strong>返回信息</strong></td>
+													<td class="am-u-sm-2 am-u-md-2 am-u-lg-2"><strong>执行时间</strong></td>
+												</thead>
+												<tbody>
+													<tr ng-repeat="hisstep in waveinfo.WaveInfo">
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.StepId}}</td>
+														<td class="am-u-sm-4 am-u-md-4 am-u-lg-4" data-toggle="tooltip" title="URL: {{hisstep.Url}}">{{hisstep.Url | limitTo:64}}<a ng-show="hisstep.Url.length>64"><strong>...</strong></a></td>
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Method}}</td>
+														<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Result}}</td>
+														<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result=='200'">{{hisstep.ResultMessage}}</td>
+														<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result!='200'">{{hisstep.RetData}}</td>
+														<td class="am-u-sm-2 am-u-md-2 am-u-lg-2">{{hisstep.ExecuteSec}}</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</td>						
+						</tr>						
+					</tbody>
+				</table>
+			</div>		
+			
+			<form role="form" name="updateTaskForm" ng-show="ShowUpdate" >
+				<div class="am-form-group">
+					<label>任务名称<span class="am-text-danger">*</span></label>
+					<input type="text" class="am-form-field" name="TaskName" ng-model="Task.TaskName" placeholder="任务名称" required />
+					<div ng-show="updateTaskForm.TaskName.$dirty&&updateTaskForm.TaskName.$error.required" class="am-text-danger">请输入任务名称</div>
+				</div>
+				<div class="am-form-group">
+                <label>任务类型<span class="am-text-danger" >*</span></label>
+					<select class="am-form-field" ng-model="Task.TaskType" ng-change="QueryCase();" >
+						<option value="1">默认</option>
+						<option value="2">测试-手动</option>
+						<option value="3">测试-自动化</option>
+					</select>
+				</div>
+				<div class="am-form-group">
+					<label>指派给</label>
+					<select class="am-form-field" ng-model="Task.AssignTo">
+						<option value="-1">我</option>
+						{% for member in MemberList %}
+						<option value="((member.UserId))">((member.Nick))</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="am-form-group">
+					<label>优先级</label>
+					<select class="am-form-field" ng-model="Task.Priority">
+						<option value="1">高</option>
+						<option value="2">中</option>
+						<option value="3">低</option>
+					</select>
+				</div>
+				<div class="am-form-group">
+					<label>进度</label>
+					<select class="am-form-field" ng-model="Task.Progress">
+						<option value="0">0%</option>
+						<option value="10">10%</option>
+						<option value="20">20%</option>
+						<option value="30">30%</option>
+						<option value="40">40%</option>
+						<option value="50">50%</option>
+						<option value="60">60%</option>
+						<option value="70">70%</option>
+						<option value="80">80%</option>
+						<option value="90">90%</option>
+						<option value="100">100%</option>
+					</select>
+				</div>
+				<div class="am-form-group">
+					<label>状态</label>
+					<select class="am-form-field" ng-model="Task.Status">
+						<option value="1">新创建</option>
+						<option value="2">进行中</option>
+						<option value="3">已完成</option>
+						<option value="4">已取消</option>
+					</select>
+				</div>
+				<div class="am-form-group">
+					<label>累加工时(小时)</label>
+					<input type="text" class="am-form-field" name="Effort" ng-model="Task.Effort" integer placeholder="本次任务新加工时" />
+					<div ng-show="updateTaskForm.Effort.$dirty&&updateTaskForm.Effort.$error.integer" class="am-text-danger">请输入一个整数</div>
+				</div>
+				<div class="am-form-group">
+					<label>详细描述</label>
+					<script id="editor" type="text/plain">
+					</script>
+				</div>
+				<div class="am-form-group" ng-show="Task.TaskType==2||Task.TaskType==3" >
+					<div class="am-panel am-panel-default" >
+						<div class="am-panel-hd"><strong>关联用例列表</strong></div>
+						<div class="am-panel-bd" >
+							<table class="am-table" >
+								<thead>
+								  <tr>
+									<th class="table-check"><input  type="checkbox" ng-model="IsCheckAll" ng-checked="IsCheckAll" ng-click="CheckAll(IsCheckAll);" ></th>
+									<th>编号</th>
+									<th>用例标题</th>				
+								  </tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="Case in TaskQueryCaseList">
+										<td><input type="checkbox" ng-model="Case.IsChecked" ng-checked="Case.IsChecked" ></td>
+										<td><a href="/Case/Detail/((Task.ProjectId))_{{Case.CaseId}}" class="am-text-left">{{Case.CaseId}}</a></td>
+										<td title="{{Case.Subject}}">{{ Case.Subject | limitTo: 48 }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>				
+				<button type="button" id="btnUpdate" ng-disabled="updateTaskForm.$invalid" class="am-btn am-btn-primary" data-loading-text="正在更新" ng-click="update()"><i class="fa fa-save fa-fw"></i>保存</button>
+				<button type="button" id="btnBack"  class="am-btn am-btn-info" data-loading-text="正在返回" ng-click="ShowUpdate=false"><i class="am-icon-back"></i>返回</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

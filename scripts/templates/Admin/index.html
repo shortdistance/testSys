@@ -1,0 +1,77 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+{% if session['isadmin'] %}
+<li><a href="/Admin"><i class="am-icon-gear"></i>系统设置</a></li>
+{% endif %}
+{% endblock %}
+{% block subcontent %}
+<div class="am-ng" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+    <div class="am-u-sm-12 am-u-md-4 am-u-lg-2">
+		  <ul class="am-list">
+			<li><a href="/Admin"><span class="am-icon-home"></span> 用户管理</a></li>
+		  </ul>
+    </div>
+    <div class="am-u-sm-12 am-u-md-8 am-u-lg-10">
+        <div class="am-panel am-panel-primary ng-cloak" ng-controller="UserManagementCtrl" ng-init="query()">
+            <div class="am-panel-hd am-cf"><i class="am-icon-user"></i>系统用户</div>
+            <div class="am-panel-bd">
+                <form class="am-form-inline" role="form">
+                    <div class="am-form-group">
+                        <div class="am-form-group">
+                            <label class="am-form-label">电子邮件/昵称</label>
+                            <input type="text" class="am-form-field" placeholder="电子邮件/昵称" name="Word" ng-model="Query.Word" />
+                        </div>
+                        <div class="am-form-group">
+                            <select class="am-form-field" ng-model="Query.Status">
+                                <option value="-1">全部</option>
+                                <option value="1">启用</option>
+                                <option value="2">禁用</option>
+                            </select>
+                        </div>
+                        <div class="am-form-group">
+                            <button type="button" ng-click="Query.PageNo=1;query()" data-loading-text="正在查询" id="btnQuery" class="am-btn am-btn-primary"><i class="am-icon-search"></i>查找用户</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="am-panel am-panel-default">
+                    <div class="am-panel-bd">
+                        <div>
+							<table class="am-table">
+							  <thead>
+								  <tr>
+									<th>用户名</th>	
+									<th>注册时间</th>
+									<th>操作</th>
+								  </tr>
+							  </thead>
+							  <tbody>
+								<tr ng-repeat="User in UserList">
+								  <td><h4>{{User.Nick}} <small>{{User.Email}}</small></h4></td>
+								  <td>注册时间：{{ User.RegDate | date:'yyyy-MM-dd' }}</td>
+								  <td>
+								    <div class="am-btn-group">
+                                        <button class="am-btn am-btn-success am-btn-xs" ng-click="enable(User.UserId)" ng-show="User.Status==2"><i class="am-icon-edit"></i>启用</button>
+                                        <button class="am-btn am-btn-danger am-btn-xs" ng-click="disable(User.UserId)" ng-show="User.Status==1"><i class="am-icon-ban"></i>禁用</button>
+                                        <!--<button class="am-btn am-btn-primary am-btn-xs" ng-click="resetpass(User.UserId)"><i class="am-icon-key"></i>重设密码123</button>-->
+                                        <button class="am-btn am-btn-success am-btn-xs" ng-click="assignadmin(User.UserId)" ng-show="!User.IsAdmin"><i class="am-icon-rocket"></i>设为管理员</button>
+                                        <button class="am-btn am-btn-danger am-btn-xs" ng-click="assignadmin(User.UserId)" ng-show="User.IsAdmin"><i class="am-icon-ban"></i>去除管理员</button>
+                                    </div>
+								  </td>
+								</tr>
+							   </tbody>
+							</table>
+                        </div>
+                        <div class="am-text-center">
+                            <ul class="am-pagination am-pagination-default">
+                                <li><a href="#" ng-class="Query.PageNo<=1?'btn disabled':''" ng-click="Query.PageNo=Query.PageNo-1;query()">上一页</a></li>
+                                <li><a href="#" ng-class="Query.PageNo>=Query.PageCount?'btn disabled':''" ng-click="Query.PageNo=Query.PageNo+1;query()">下一页</a></li>
+                                <!--<li><span>第<strong>{{Query.PageNo}}</strong>页 共<strong>{{Query.PageCount}}</strong>页 共<strong>{{Query.RowCount}}</strong>条</span></li>-->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

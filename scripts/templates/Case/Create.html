@@ -1,0 +1,90 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li class="active"><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+	<div class="am-panel am-panel-primary ng-cloak" ng-controller="CaseCreateCtrl" ng-init="CaseInfo.ProjectId=((ProjectId));CaseInfo.CaseType=1;query()">
+		<div class="am-panel-hd"><i class="am-icon-plus"></i>创建新用例</div>
+		<div class="am-panel-bd">
+			<table class="am-table am-table-bordered am-table-radius">
+				<tbody>
+				<tr>
+					<div class="am-form-group">
+					<td>用例类型<span class="am-text-danger">*</span></td>
+					<td>
+						<select class="am-form-field" ng-model="CaseInfo.CaseType" >
+							<option value="1">手动测试用例</option>
+							<option value="2">自动化测试用例</option>
+						</select>
+					</td>
+					</div>
+				</tr>
+				<tr>
+					<div class="am-form-group">
+					<td>用例标题<span class="am-text-danger">*</span></td>
+					<td><input type="text" class="am-form-field" id="Subject" name="Subject" ng-model="CaseInfo.Subject" placeholder="用例标题" required maxlength=255/></td>
+					</div>
+				</tr>
+				<tr ng-repeat="caseField in CaseFieldList" ng-show="caseField.IsEnabled">				
+					<td><label>{{caseField.CustomFieldDesc}}<span class="am-text-danger">*</span></label></td>					
+					<td>
+						<div class="am-btn-group">
+						  <label class="am-radio" ng-repeat="CustomValue in caseField.CustomValueList track by $index" ng-show="CustomValue.IsEnabled" ng-click="CustomValue.Selected=!CustomValue.Selected">
+							<input type="radio"  value="{{CustomValue.FieldValueId}}" name="{{caseField.CustomFieldDesc}}" ng-click="caseField.FieldValueSelected=CustomValue.CustomFieldValueId" required>{{CustomValue.FieldValue}}
+						  </label>
+						</div>
+						
+					</td>
+				</tr>
+				<tr>				
+					<div class="am-form-group">
+						<td><label>前置条件</label><span class="am-text-danger">*</span></label></td>
+						<td><script id="Precondition" type="text/plain" required></script></td>
+					</div>
+				</tr>
+				<tr>				
+					<div class="am-form-group">
+						<td><label>测试步骤</label><span class="am-text-danger">*</span></label></td>
+						<td><script id="TestSteps" type="text/plain" required></script></td>
+					</div>
+				</tr>
+				<tr>				
+					<div class="am-form-group">
+						<td><label>预期结果</label><span class="am-text-danger">*</span></label></td>
+						<td><script id="ExpectedResult" type="text/plain" required></script></td>
+					</div>
+				</tr>
+				<!--
+				<tr ng-show="CaseInfo.CaseType==2">			
+					<div class="am-form-group">
+						<td><label>测试脚本</label><span class="am-text-danger">*</span></label></td>
+						<td>
+							<iframe id="calliframe" name="calliframe" width="100%" height="100%" onload="this.height=calliframe.document.body.scrollHeight"  frameborder="0"></iframe>
+							<form class="am-form-inline" id="frm_attachment" name="frm_attachment" action="/case/upload_attachment/((ProjectId))" method="post" enctype="multipart/form-data" target="calliframe">
+								<label for="attachment" >上传附件：</label>
+								<input type="file" id="attachment" name="attachment" /><br />
+								<input type="submit" id="uploadSubmit" class="am-btn am-btn-xs am-btn-primary" value="上传" />
+								<input type="reset" id="uploadReset" class="am-btn am-btn-xs am-btn-default" value="重置" />
+								<hr />
+							</form>						
+						</td>
+					</div>
+				</tr>
+				-->
+				<tr>	
+					<td><button type="button" id="btnCaseCreate" class="am-btn am-btn-primary am-btn-xs" data-loading-text="正在创建" ng-click="create()"><i class="am-icon-save"></i>创建</button></td>
+					<td></td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+  
+{% endblock %}

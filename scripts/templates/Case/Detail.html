@@ -1,0 +1,480 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li class="active"><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+	<div class="am-panel am-panel-primary ng-cloak" ng-controller="CaseUpdateCtrl" ng-init="UserId=((session['userid']));Case.CaseId='((RetTCInfo.CaseId ))';Case.ProjectId=((ProjectId));GetChangeHistory();GetExecuteHistory();GetExistingFields();QueryComment();GetCaseLinkBug();GetAutorunHistory();" >
+		<div class="am-panel-hd"><i class="am-icon-info"></i>用例信息</div>
+		<div class="am-alert am-alert-success am-alert-dismissable" ng-show="IsExecuteSucc">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			<strong>用例执行成功!</strong>
+		</div>
+		<div class="am-alert am-alert-danger am-alert-dismissable" ng-show="IsExecuteFail">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			<strong>用例执行失败!</strong>
+		</div>
+		<div class="am-alert am-alert-warning am-alert-dismissable" ng-show="IsCantExecute">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			<strong>用例不能执行!</strong>
+		</div>
+		<div class="am-panel-bd">
+			<div ng-show="!ShowUpdate">
+				<table class="am-table am-table-bordered">
+				    <tbody>
+						<tr ng-init="Case.CaseId='((RetTCInfo.CaseId))'" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>用例Id:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.CaseId ))</td>
+						</tr>
+						<tr ng-init="Case.CaseType='((RetTCInfo.CaseType))'" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>用例类型:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<span ng-switch on="Case.CaseType">
+									<strong  class="label label-info" ng-switch-when="1">手动</strong>
+									<strong  class="label label-danger" ng-switch-when="2">自动化</strong>
+								</span>
+						  </td>
+						</tr>
+						<tr ng-init="Case.Subject='((RetTCInfo.Subject))'" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>用例标题:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.Subject))</td>
+						</tr>
+						<tr ng-init="Case.PreCondition='((RetTCInfo.PreCondition))';" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>前置条件:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.PreCondition|safe))</td>
+						</tr>
+						<tr ng-init="Case.TestSteps='((RetTCInfo.TestSteps))';" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>测试步骤:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.TestSteps|safe))</td>
+						</tr>
+						<tr ng-init="Case.ExpectedResult='((RetTCInfo.ExpectedResult))';" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>期望结果:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.ExpectedResult|safe))</td>
+						</tr>
+						
+						<tr ng-init="Case.AutoRunScriptFile='((RetTCInfo.AutoRunScriptFile))';" ng-show="Case.CaseType==2" >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>脚本:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{% if RetTCInfo.AutoRunScriptFile != '' %}
+								<a href="((RetTCInfo.AutoRunScriptFile))"><img src="/static/img/png/glyphicons_062_paperclip.png" /></a>
+								<a href="/Case/Script/((ProjectId))_((RetTCInfo.CaseId))" class="am-text-left">进入脚本处理页面</a>
+								{% else %}
+								无脚本
+								{% endif %}
+						  </td>
+						</tr>
+						
+						<tr ng-repeat="caseField in CaseSettingList" ng-show="caseField.IsEnabled">
+							<td  class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>{{caseField.CustomFieldDesc}}:</strong></td>				
+							<td  class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{{caseField.FieldValueSelected}}
+							</td>
+						</tr>
+						
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>创建人:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.Author))</td>
+						</tr>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>创建时间:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.CreateTime.strftime('%Y-%m-%d %H:%M:%S')))</td>
+						</tr>
+
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最近更新人:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.LastEditBy))</td>
+						</tr>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>更新时间:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.LastEditByTime.strftime('%Y-%m-%d %H:%M:%S')))</td>
+						</tr>
+
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最近执行人:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.LastRunTester))</td>
+						</tr>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>执行时间:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">((RetTCInfo.LastRunTime.strftime('%Y-%m-%d %H:%M:%S')))</td>
+						</tr>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>最近执行结果:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+							<span ng-switch on="((RetTCInfo.LastRunResult))">
+								<strong class="label label-info" ng-switch-when="0">未执行</strong>
+								<strong class="label label-success" ng-switch-when="1">成功</strong>
+								<strong class="label label-danger" ng-switch-when="2">失败</strong>
+								<strong class="label label-default" ng-switch-when="3">无法执行</strong>
+							</span>							  
+						  </td>
+						</tr>						
+						<tr ng-show="Case.CaseType==1" >
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>执行用例:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<div class="am-btn-group am-btn-group-xs">
+									<button type="button" id="btnExecutePass" class="am-btn am-btn-xs am-btn-success" ng-click="ExecuteCaseQuery.Result=1;NotExecutePass=false;IsExecuteSucc=true;IsExecuteFail=false;IsCantExecute=false;ExecutePass();" data-am-button><span class="am-icon-check"></span>执行通过</button>
+									<button type="button" id="btnExecuteFail" class="am-btn am-btn-xs am-btn-danger" ng-click="ExecuteCaseQuery.Result=2;NotExecutePass=true;IsExecuteSucc=false;IsExecuteFail=true;IsCantExecute=false;" data-am-button><span class="am-icon-close"></span>执行失败</button>
+									<button type="button" id="btnCantExecute" class="am-btn am-btn-xs am-btn-default" ng-click="ExecuteCaseQuery.Result=3;NotExecutePass=true;IsExecuteSucc=false;IsExecuteFail=false;IsCantExecute=true;" data-am-button><span class="am-icon-lock"></span>不能执行</button>
+								</div>
+
+								<div ng-show="NotExecutePass" >
+									<hr />
+									<div class="am-form-group">
+										<label for="TestData" >测试数据：</label>
+										<textarea name="TestData" id="TestData"  class="textarea" ng-model="ExecuteCaseQuery.TestData" placeholder="测试数据" required minlength=1></textarea>
+										<hr />
+									</div>
+									
+									<iframe id="calliframe" name="calliframe" width="100%" height="100%" onload="this.height=calliframe.document.body.scrollHeight"  frameborder="0"></iframe>
+									<form class="am-form-inline" id="frm_attachment" name="frm_attachment" action="/case/upload_attachment/((ProjectId))" method="post" enctype="multipart/form-data" target="calliframe">
+										<label for="attachment" >上传附件：</label>
+										<input type="file" id="attachment" name="attachment" /><br />
+										<input type="submit" id="uploadSubmit" class="am-btn am-btn-xs am-btn-primary" value="上传" />
+										<input type="reset" id="uploadReset" class="am-btn am-btn-xs am-btn-default" value="重置" />
+										<hr />
+									</form>
+									<div class="am-form-group">
+										<label for="BackupInfo" >结果说明：</label>
+										<textarea name="BackupInfo" id="BackupInfo" class="textarea" ng-model="ExecuteCaseQuery.BackupInfo" placeholder="结果说明" required minlength=1></textarea>
+										<hr />
+									</div>
+									<div class="am-checkbox">
+										<label>
+											<input type="checkbox" id="needCreateBug" name="needCreateBug" ng-click="CheckBoxSelect();Issue.AssignTo=((session['userid']))"> <strong><i>自动创建新一个BUG??</i></strong>
+										</label>
+									</div>
+
+									<p>
+										<button id="btnExecuteInfoSubmit" class="am-btn am-btn-xs am-btn-primary" ng-click="CreateIssue();CantExecutePass();" >提交</button>
+										<a type="button" class="am-btn am-btn-xs am-btn-default" ng-click="CantExecutePassBack();" >返回</a>
+									</p>
+								</div>
+						  </td>
+						</tr>
+						<tr>
+						  <td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>其他操作:</strong></td>
+						  <td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+						   <div class="am-btn-toolbar">
+								<div class="am-btn-group am-btn-group-xs">
+									<button type="button" class="am-btn am-btn-xs am-btn-warning" ng-show="Case.CaseType==2&&Case.AutoRunScriptFile.length>0" ng-click="RunScript();"><span class="am-icon-circle-o-notch"></span>执行</button>
+									<button type="button" class="am-btn am-btn-xs am-btn-primary" ng-click="edit();"><span class="am-icon-copy"></span>编辑</button>
+									<a type="button" class="am-btn am-btn-xs am-btn-secondary" id="btnWriteNote" ng-click="WriteNote=!WriteNote" ><span class="am-icon-pencil-square-o"></span>备注</a>
+									{% if RetTCInfo.Author==Current_User %}
+									<button type="button" id="btnDelete" class="am-btn  am-btn-xs am-btn-danger" data-loading-text="正在删除" ng-click="Delete()"><span class="am-icon-trash-o"></span>删除</button>
+									{% else %}
+									<button type="button" id="btnDelete" class="am-btn am-btn-xs am-btn-danger" disabled="disabled"><span class="am-icon-trash-o"></span>删除-((RetTCInfo.Author))</button>
+									{% endif %}
+									<a href="/Project/Case/((ProjectId))" class="am-btn am-btn-xs am-btn-default"><span class="am-icon-pencil-square-o"></span>返回</a>
+								</div>
+						   </div>
+						  </td>			  
+						</tr>
+						
+						<tr ng-show="LinkBugList.length>0" >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>已关联Bug:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<table class="am-table">
+									<tbody>
+										<tr ng-repeat="linkBug in LinkBugList">
+											<td>
+												<a href="/Issue/Detail/((ProjectId))_{{linkBug.IssueId}}">{{linkBug.IssueId}}</a>
+											</td>
+											<td>
+												<span ng-switch on="linkBug.IssueStatus">
+													<strong class="label label-info" ng-switch-when="1">新创建</strong>
+													<strong class="label label-success" ng-switch-when="2">已解决</strong>
+													<strong class="label label-default" ng-switch-when="3">已关闭</strong>
+													<strong class="label label-default" ng-switch-when="4">已取消</strong>
+												</span>	
+											</td>
+                                            <td>
+                                                {{linkBug.IssueSubject | limitTo: 48 }}
+                                            </td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+			<div name="updateCaseForm" ng-show="ShowUpdate">
+				<table class="am-table am-table-bordered table-main">
+				    <tbody>
+						<tr>
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>用例类型:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<select class="am-form-field" ng-model="Case.CaseType" ng-disabled >
+									<option value="1">手动</option>
+									<option value="2">自动化</option>
+								</select>
+							</td>
+						</tr>
+						<tr >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>用例标题:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<input type="text" class="am-form-field" name="Subject" ng-model="Case.Subject" placeholder="用例标题" required />
+								<div ng-show="updateCaseForm.Subject.$dirty&&updateCaseForm.Subject.$error.required" class="am-text-danger">请输入用例标题</div>
+							</td>
+						</tr>
+						<tr >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>前置条件:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<script id="editorPreCondition" type="text/plain">
+								</script>
+							</td>
+						</tr>
+						<tr >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>测试步骤:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<script id="editorTestSteps" type="text/plain">
+								</script>
+							</td>
+						</tr>
+						<tr >
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>期望结果:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								<script id="editorExpectedResult" type="text/plain">
+								</script>
+							</td>
+						</tr>
+						<tr ng-show="Case.CaseType==2">
+							<td class="am-u-sm-4 am-u-md-3 am-u-lg-2 am-text-right"><strong>测试脚本:</strong></td>
+							<td class="am-u-sm-8 am-u-md-9 am-u-lg-10">
+								{% if RetTCInfo.AutoRunScriptFile != '' %}
+								<a href="((RetTCInfo.AutoRunScriptFile))"><img src="/static/img/png/glyphicons_062_paperclip.png" /></a>
+								{% endif %}
+								<iframe id="calliframe1" name="calliframe1" width="100%" height="100%" onload="this.height=calliframe1.document.body.scrollHeight"  frameborder="0"></iframe>
+								<form class="am-form-inline" id="frm_attachment1" name="frm_attachment1" action="/case/upload_autorun/((ProjectId))_((RetTCInfo.CaseId))" method="post" enctype="multipart/form-data" target="calliframe1">
+									<label for="attachment1" >上传附件：</label>
+									<input type="file" id="attachment1" name="attachment1" /><br />
+									<input type="submit" id="uploadSubmit1" class="am-btn am-btn-xs am-btn-primary" value="上传" />
+									<input type="reset" id="uploadReset1" class="am-btn am-btn-xs am-btn-default" value="重置" />
+								</form>						
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<button type="button" id="btnUpdate" ng-disabled="updateCaseForm.$invalid" class="am-btn am-btn-primary" data-loading-text="正在更新" ng-click="update()"><i class="am-icon-save"></i>保存</button>
+				<button type="button" id="btnBack"  class="am-btn am-btn-info" data-loading-text="正在返回" ng-click="ShowUpdate=false"><i class="am-icon-back"></i>返回</button>
+			</div>
+			
+			<div class="am-tabs" data-am-tabs ng-show="!ShowUpdate">
+				<ul class="am-tabs-nav am-cf am-nav am-nav-tabs">
+				  <li><a href="#tab1">备注信息<span class="am-badge am-badge-warning">{{CommentQuery.RowCount}}</span></a></li>
+				  <li><a href="#tab2">修改记录<span class="am-badge am-badge-warning">{{ChangeHistoryQuery.RowCount}}</span></a></li>
+				  <li ng-show="Case.CaseType==1"><a href="#tab3">执行记录<span class="am-badge am-badge-warning">{{ExecuteHistoryQuery.RowCount}}</span></a></li>
+				  <li ng-show="Case.CaseType==2"><a href="#tab3">执行记录<span class="am-badge am-badge-warning">{{AutoRunHistoryQuery.RowCount}}</span></a></li>
+				</ul>
+	
+				<div class="am-tabs-bd">
+					<!--备注信息-->
+					<div class="am-tab-panel am-fade am-in" id="tab1">
+						<div ng-show="WriteNote">
+							<div  class="am-form-group">
+								<textarea name="comment" id="comment" rows="6"  cols="100" class="textarea" ng-model="NoteContent" ></textarea>
+							</div>
+							<button type="button" id="btnCommentSubmit"  class="am-btn am-btn-primary am-btn-xs" data-loading-text="正在提交" ng-click="SubmitComment();QueryComment();"><i class="am-icon-back"></i>提交</button>
+						</div>
+						<hr />
+						<div>
+							<div ng-repeat="Comment in CommentList">
+								<div class="row am-g">
+									<article class="am-comment">
+									  <div>
+										  <a href="#">
+											<img src="/static/assets/i/favicon.png" alt="" class="am-comment-avatar" width="48" height="48"/>
+										  </a>
+									  </div>
+									  <div>
+										  <div class="am-comment-main">
+											<header class="am-comment-hd">
+											  <div class="am-comment-meta">
+												<a href="#link-to-user" class="am-comment-author">{{Comment.AuthorName}}</a>
+												评论于 <time datetime="Comment.CreateTime" title="Comment.CreateTime">{{Comment.CreateTime}}</time>
+											  </div>
+											</header>
+
+											<div class="am-comment-bd">
+											  {{Comment.Content}}
+											</div>
+										  </div>
+										</div>
+									</article>
+									<hr />
+								</div>
+							</div>
+							<div class="am-text-center">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="CommentQuery.PageNo<=1?'btn disabled':''" ng-click="CommentQuery.PageNo=CommentQuery.PageNo-1;QueryComment()"><small>上一页</small></a></li>
+									<li><span><small>&lt;{{CommentQuery.PageNo}}/{{CommentQuery.PageCount}}&gt;</small></span></li>
+									<li><a href="#" ng-class="CommentQuery.PageNo>=CommentQuery.PageCount?'btn disabled':''" ng-click="CommentQuery.PageNo=CommentQuery.PageNo+1;QueryComment()"><small>下一页</small></a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					
+					<!--修改记录-->
+					<div class="am-tab-panel am-fade" id="tab2" >
+						<div class="am-panel am-panel-primary" ng-repeat="changehistory in ChangeHistoryList" >
+							<div class="am-panel-hd">{{ changehistory.Creator}} 更新于 <i class="am-icon-clock"></i>{{ changehistory.CreateTime}}</div>
+							<div class="am-panel-bd">
+								<table class="am-table table-main am-table-bordered  am-table-striped am-table-hover">
+									<thead>
+										<tr>
+											<th class="au-u-sm-2 am-text-left" >字段</th>	
+											<th class="au-u-sm-5 am-text-left" >原值</th>
+											<th class="au-u-sm-5 am-text-left" >新值</th>
+										</tr>
+									</thead>	
+									<tbody>
+										<tr ng-show="changehistory.RawSubject!=changehistory.NewSubject">
+											<td class="au-u-sm-2 am-text-left">标题</td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.RawSubject | trustHtml"></td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.NewSubject | trustHtml"></td>						
+										<tr ng-show="changehistory.RawPreCondition!=changehistory.NewPreCondition">
+											<td class="au-u-sm-2 am-text-left">预置条件</td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.RawPreCondition | trustHtml"></td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.NewPreCondition | trustHtml"></td>
+										</tr>
+										<tr ng-show="changehistory.RawTestSteps != changehistory.NewTestSteps">
+											<td class="au-u-sm-2 am-text-left" >测试步骤</td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.RawTestSteps | trustHtml"></td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.NewTestSteps | trustHtml"></td>
+										</tr>
+										<tr ng-show="changehistory.RawExpectedResult!=changehistory.NewExpectedResult">
+											<td class="au-u-sm-2 am-text-left" >期望结果</td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.RawExpectedResult | trustHtml"></td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.NewExpectedResult | trustHtml"></td>
+										</tr>
+										<tr ng-show="changehistory.RawAutoRunScriptFile!=changehistory.NewAutoRunScriptFile">
+											<td class="au-u-sm-2 am-text-left" >测试脚本</td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.RawAutoRunScriptFile | trustHtml"></td>
+											<td class="au-u-sm-5 am-text-left" ng-bind-html="changehistory.NewAutoRunScriptFile | trustHtml"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="am-text-center">
+							<ul class="am-pagination am-pagination-default">
+								<li><a href="#" ng-class="ChangeHistoryQuery.PageNo<=1?'btn disabled':''" ng-click="ChangeHistoryQuery.PageNo=ChangeHistoryQuery.PageNo-1;GetChangeHistory()"><small>上一页</small></a></li>
+								<li><span><small>&lt;{{ChangeHistoryQuery.PageNo}}/{{ChangeHistoryQuery.PageCount}}&gt;</small></span></li>
+								<li><a href="#" ng-class="ChangeHistoryQuery.PageNo>=ChangeHistoryQuery.PageCount?'btn disabled':''" ng-click="ChangeHistoryQuery.PageNo=ChangeHistoryQuery.PageNo+1;GetChangeHistory()"><small>下一页</small></a></li>
+							</ul>
+						</div>
+					</div>
+					
+					<!--执行记录-->
+					<div class="am-tab-panel am-fade" id="tab3">
+						<div ng-show="Case.CaseType==1">
+							<div class="am-panel am-panel-primary" ng-repeat="executehistory in ExecuteHistoryList" >
+								<div class="am-panel-hd">{{ executehistory.Tester}} 执行于 <i class="am-icon-clock"></i>{{ executehistory.ExecuteTime}}</div>
+								<div class="am-panel-bd">
+									<table class="am-table table-main am-table-striped am-table-hover">
+										<thead>
+											<tr>
+												<th class="au-u-sm-2 am-text-left" >结果</th>	
+												<th class="au-u-sm-3 am-text-left" >数据</th>
+												<th class="au-u-sm-2 am-text-left" >附件</th>
+												<th class="au-u-sm-5 am-text-left" >说明</th>
+											</tr>
+										</thead>	
+										<tbody>
+											<tr>
+												<td class="au-u-sm-2 am-text-left">
+													<span ng-switch on="executehistory.ExecuteResult">
+														<strong class="label label-success" ng-switch-when="1">成功</strong>
+														<strong class="label label-danger" ng-switch-when="2">失败</strong>
+														<strong class="label label-default" ng-switch-when="3">无法执行</strong>
+													</span>	
+												</td>
+												<td class="au-u-sm-3 am-text-left">
+													{{executehistory.TestData}}
+												</td>
+												<td class="au-u-sm-2 am-text-left">
+													<a href="{{executehistory.Attachment}}">{{executehistory.Attachment}}</a>
+												</td>
+												<td class="au-u-sm-5 am-text-left">
+													{{executehistory.BackupInfo}}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>					
+							</div>
+							<div class="am-text-center">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="ExecuteHistoryQuery.PageNo<=1?'btn disabled':''" ng-click="ExecuteHistoryQuery.PageNo=ExecuteHistoryQuery.PageNo-1;GetExecuteHistory()"><small>上一页</small></a></li>
+									<li><span><small>&lt;{{ExecuteHistoryQuery.PageNo}}/{{ExecuteHistoryQuery.PageCount}}&gt;</small></span></li>
+									<li><a href="#" ng-class="ExecuteHistoryQuery.PageNo>=ExecuteHistoryQuery.PageCount?'btn disabled':''" ng-click="ExecuteHistoryQuery.PageNo=ExecuteHistoryQuery.PageNo+1;GetExecuteHistory()"><small>下一页</small></a></li>
+								</ul>
+							</div>	
+						</div>
+
+						<div ng-show="Case.CaseType==2">
+							<div class="am-panel am-panel-default" ng-repeat="autoRunInfo in AutoRunHistoryList" >
+								<div class="am-panel-hd" data-am-collapse="{parent: '#accordion', target: '#{{autoRunInfo.WaveId}}'}">
+									<table class="am-table">
+										<tr>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left lead" ><span class="am-icon-file-text am-text-warning">批次号:{{autoRunInfo.WaveId}}</span></a></td>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" class="am-text-left">
+												执行结果:
+												<span ng-switch on="autoRunInfo.IsPass">
+													<strong class="label label-success" ng-switch-when="true">成功</strong>
+													<strong class="label label-danger" ng-switch-when="false">失败</strong>
+												</span>
+											</td>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left"><strong>返回码:</strong>{{autoRunInfo.RetCode}}</a></td>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left"><strong>执行人:</strong>{{autoRunInfo.Runner}}</a></td>
+										</tr>
+									</table>								
+								</div>
+								<div id="{{autoRunInfo.WaveId}}" class="am-panel-collapse am-collapse" >
+									<div class="am-panel-bd">
+										<table class="am-table">
+											<thead>
+												<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>StepId</strong></td>
+												<td class="am-u-sm-4 am-u-md-4 am-u-lg-4"><strong>Url</strong></td>
+												<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>方式</strong></td>
+												<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>返回码</strong></td>
+												<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><strong>返回信息</strong></td>
+												<td class="am-u-sm-2 am-u-md-2 am-u-lg-2"><strong>执行时间</strong></td>
+											</thead>
+											<tbody>
+												<tr ng-repeat="hisstep in autoRunInfo.WaveInfo">
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.StepId}}</td>
+													<td class="am-u-sm-4 am-u-md-4 am-u-lg-4" data-toggle="tooltip" title="URL: {{hisstep.Url}}">{{hisstep.Url | limitTo:64 }}<a ng-show="hisstep.Url.length>64"><strong>...</strong></a></td>
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Method}}</td>
+													<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Result}}</td>
+													<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result=='200'">{{hisstep.ResultMessage}}</td>
+													<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result!='200'">{{hisstep.RetData}}</td>
+													<td class="am-u-sm-2 am-u-md-2 am-u-lg-2">{{hisstep.ExecuteSec}}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<div class="am-text-center">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="AutoRunHistoryQuery.PageNo<=1?'btn disabled':''" ng-click="AutoRunHistoryQuery.PageNo=AutoRunHistoryQuery.PageNo-1;GetAutorunHistory();"><small>上一页</small></a></li>
+									<li><span><small>&lt;{{AutoRunHistoryQuery.PageNo}}/{{AutoRunHistoryQuery.PageCount}}&gt;</small></span></li>
+									<li><a href="#" ng-class="AutoRunHistoryQuery.PageNo>=AutoRunHistoryQuery.PageCount?'btn disabled':''" ng-click="AutoRunHistoryQuery.PageNo=AutoRunHistoryQuery.PageNo+1;GetAutorunHistory();"><small>下一页</small></a></li>
+								</ul>
+							</div>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

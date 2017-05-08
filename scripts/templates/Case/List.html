@@ -1,0 +1,76 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li class="active"><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+	<div class="ng-cloak" ng-controller="CaseCtrl" ng-init="Query.ProjectId=((ProjectId));queryInit();">
+		<form class="am-form-inline" role="form">
+			<div class="am-form-group">
+				<div class="am-form-group">
+					<a href="/Case/Create/((ProjectId))" class="am-btn am-btn-success"><i class="am-icon-plus"></i>新用例</a>
+				</div>
+				<div class="am-form-group">
+					<select class="am-form-field" ng-model="Query.CaseType">
+						<option value="0">所有类型</option>
+						<option value="1">手动测试用例</option>
+						<option value="2">自动化测试用例</option>
+					</select>
+				</div>
+				<div class="am-form-group">
+					<input type="text" class="am-form-field" placeholder="用例标题" name="Subject" ng-model="Query.Subject" />
+				</div>				
+				<div class="am-form-group">
+					<button type="button" ng-click="Query.PageNo=1;queryCase()" data-loading-text="正在查询" id="btnQuery" class="am-btn am-btn-primary"><i class="am-icon-search"></i>查找</button>
+				</div>
+			</div>
+		</form>
+		<div class="am-panel am-panel-primary" >
+			<div class="am-panel-hd"><i class="am-icon-suitcase"></i>用例列表</div>
+			<div class="am-panel-bd">
+				<div ng-repeat="Case in CaseList">
+					<div class="row">
+						<div class="am-u-sm-12 am-u-md-2 am-u-lg-2" >
+							<span class="am-icon-suitcase am-text-primary lead"><a href="/Case/Detail/{{Query.ProjectId}}_{{Case.CaseId}}">{{Case.CaseId}}</a></span>
+						</div>
+						<div class="am-u-sm-12 am-u-md-4 am-u-lg-5 ng-cloak">
+							<span ng-switch on="Case.LastRunResult">
+								<strong class="label label-info" ng-switch-when="0">新建</strong>
+								<strong class="label label-success" ng-switch-when="1">执行成功</strong>
+								<strong class="label label-danger" ng-switch-when="2">执行失败</strong>
+								<strong class="label label-default" ng-switch-when="3">无法执行</strong>
+							</span>
+							<a href="/Case/Detail/{{Query.ProjectId}}_{{Case.CaseId}}" class="am-text-left lead">{{ Case.Subject | limitTo: 48 }}</a>
+						</div>
+						<div class="am-u-sm-12 am-u-md-2 am-u-lg-1 ng-cloak">
+							<span ng-switch on="Case.CaseType">
+								<strong  class="label label-info" ng-switch-when="1">手动</strong>
+								<strong  class="label label-danger" ng-switch-when="2">自动化</strong>
+							</span>
+						</div>		
+						<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">
+							<span data-toggle="tooltip" title="创建人 {{ Case.Author }}">创建人:{{ Case.Author }}</span>
+						</div>
+						<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">
+							更新于 {{Case.LastEditByTime | date:'yyyy-MM-dd HH:mm'}}
+						</div>
+					</div>
+					<hr />
+				</div>
+				<div class="am-text-center">
+					<ul class="am-pagination am-pagination-default">
+						<li><a href="#" ng-class="Query.PageNo<=1?'btn disabled':''" ng-click="Query.PageNo=Query.PageNo-1;queryInit();"><small>上一页</small></a></li>
+						<li><span><small><{{Query.PageNo}}/{{Query.PageCount}}></small></span></li>
+						<li><a href="#" ng-class="Query.PageNo>=Query.PageCount?'btn disabled':''" ng-click="Query.PageNo=Query.PageNo+1;queryInit();"><small>下一页</small></a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

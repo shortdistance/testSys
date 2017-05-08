@@ -1,0 +1,117 @@
+﻿{% extends 'PowerTeamLayout.html' %}
+{% block navs %}
+    <li class="active"><a href="/Project/Dashboard/((Project.ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+    <li><a href="/Project/Setting/((Project.ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+    <li><a href="/Project/Task/((Project.ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+    <li><a href="/Project/Case/((Project.ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+    <li><a href="/Project/Issue/((Project.ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+    <li><a href="/Project/Team/((Project.ProjectId))"><i class="am-icon-user"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+    <div class="am-ng">
+        <div class="am-panel am-panel-primary">
+            <div class="am-panel-hd am-cf"><strong><i class="am-icon-tree"></i>((Project.ProjectName))</strong><strong>
+                创建于 ((Project.CreateDate.strftime('%Y-%m-%d %H:%M'))) By ((Project.UserProfile.Nick)) </strong></div>
+            <div class="am-panel-bd">
+                <div class="row">
+                    <div class="am-u-sm-12 am-u-md-10 am-u-md-10">
+                        <div class="row">
+                            <div class="am-u-sm-6">
+                                <div class="am-panel am-panel-primary">
+                                    <div class="am-panel-hd am-cf"><i class="am-icon-tasks"></i><strong><a
+                                            href="/Project/Task/((Project.ProjectId))" style="color:white"><u>任务状态统计</u></a></strong>
+                                    </div>
+                                    <ul class="am-list am-list-static am-list-border">
+                                        {% for p in TaskStatus %}
+                                            <li>
+                                                <span class="am-badge am-badge-warning">((p[1]))</span>
+                                                <span ng-switch on="((p[0]))">
+											<strong class="label label-info" ng-switch-when="1">新创建</strong>
+											<strong class="label label-primary" ng-switch-when="2">进行中</strong>
+											<strong class="label label-success" ng-switch-when="3">已完成</strong>
+											<strong class="label label-default" ng-switch-when="4">已取消</strong>
+										</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="am-u-sm-6">
+                                <div class="am-panel am-panel-primary">
+                                    <div class="am-panel-hd am-cf"><i class="am-icon-tasks"></i><strong><a
+                                            href="/Project/Task/((Project.ProjectId))"
+                                            style="color:white"><u>任务优先级统计</u></a></strong></div>
+                                    <ul class="am-list am-list-static am-list-border">
+                                        {% for p in TaskPriority %}
+                                            <li>
+                                                <span class="am-badge am-badge-warning">((p[1]))</span>
+                                                <span ng-switch on="((p[0]))">
+											<strong class="label label-danger" ng-switch-when="1">高</strong>
+											<strong class="label label-Primary" ng-switch-when="2">中</strong>
+											<strong class="label label-default" ng-switch-when="3">低</strong>
+										</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="am-u-sm-6">
+                                <div class="am-panel am-panel-primary">
+                                    <div class="am-panel-hd am-cf"><i class="am-icon-bug"></i><strong><a
+                                            href="/Project/Issue/((Project.ProjectId))"
+                                            style="color:white"><u>问题状态统计</u></a></strong></div>
+                                    <ul class="am-list am-list-static am-list-border">
+                                        {% for p in IssueStatus %}
+                                            <li>
+                                                <span class="am-badge am-badge-warning">((p[1]))</span>
+                                                <span ng-switch on="((p[0]))">
+											<strong class="label label-info" ng-switch-when="1">打开</strong>
+											<strong class="label label-success" ng-switch-when="2">已解决</strong>
+											<strong class="label label-default" ng-switch-when="3">已关闭</strong>
+											<strong class="label label-default" ng-switch-when="4">已取消</strong>
+										</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="am-u-sm-6">
+                                <div class="am-panel am-panel-primary">
+                                    <div class="am-panel-hd am-cf"><i class="am-icon-bug"></i><strong><a
+                                            href="/Project/Issue/((Project.ProjectId))"
+                                            style="color:white"><u>问题严重级别统计</u></a></strong></div>
+                                    <ul class="am-list am-list-static am-list-border">
+                                        {% for p in IssuePriority %}
+                                            <li>
+                                                <span class="am-badge am-badge-warning">((p[1]))</span>
+                                                <span ng-switch on="((p[0]))">
+											<strong class="label label-danger" ng-switch-when="1">高</strong>
+											<strong class="label label-Primary" ng-switch-when="2">中</strong>
+											<strong class="label label-default" ng-switch-when="3">低</strong>
+										</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="am-u-sm-12 am-u-md-2 am-u-lg-2">
+                        <div class="am-panel am-panel-primary">
+                            <div class="am-panel-hd am-cf"><i class="am-icon-users"></i><strong><a
+                                    href="/Project/Team/((Project.ProjectId))"
+                                    style="color:white"><u>团队成员</u></a></strong></div>
+                            <ul class="am-list am-list-static">
+                                {% for m in MemberList %}
+                                    <li>((m.Nick))</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

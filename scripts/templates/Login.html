@@ -1,0 +1,47 @@
+﻿{% extends 'BaseLayout.html' %} 
+{% block content %}
+  <div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+    <div class="am-u-sm-centered am-u-md-centered am-u-lg-centered">
+      <form class="am-form ng-cloak" role="form" name="loginForm" ng-controller="LoginCtrl"  id="loginForm" data-am-validator>
+        <h2>欢迎使用TestSys</h2>
+
+        <div class="am-form-group">
+          <label for="email">邮箱:</label> <input type="email" class="am-form-field am-default-focus" placeholder="电子邮件" ng-model="User.Email" name="Email" required>
+        </div><br>
+
+        <div class="am-form-group">
+          <label for="password">密码:</label> <input type="password" class="am-form-field" placeholder="密码" ng-model="User.Password" name="Password" required>
+        </div><br>
+        <div>
+          <button class="am-btn am-btn-primary" id="btnLogin" class="am-btn am-btn-primary btn-loading-example" data-am-loading="{spinner: 'circle-o-notch', loadingText: '加载中...'}" ng-click="login()" ng-disabled="loginForm.$invalid" type="button" style="width:148px">登陆</button> 
+		  <a href="/Register" class="am-btn am-btn-primary" role="button" style="width:148px">注册</a>
+        </div>
+		推荐使用IE11及以上,Firefox,chrome浏览器,<a href="/uploads/Chrome_setup_chs.zip">chrome下载</a>
+		
+		<!--
+        <div class="am-alert" ng-show="(loginForm.Email.$dirty&&loginForm.Password.$dirty&&loginForm.$invalid)||!isMatch||isDisabled">
+        <div ng-show="loginForm.Email.$dirty&&loginForm.Email.$error.required" class="am-text-danger">
+            请输入电子邮件
+        </div>
+
+        <div ng-show="loginForm.Email.$dirty&&loginForm.Email.$error.email" class="am-text-danger">
+            电子邮件格式不合法
+        </div>
+
+        <div ng-show="loginForm.Password.$dirty&&loginForm.Password.$error.required" class="am-text-danger">
+            请输入密码
+        </div>
+
+         <div ng-show="loginForm.Email.$dirty&&loginForm.Password.$dirty&&!isMatch" class="am-text-danger">
+            用户名密码不正确
+         </div>
+
+         <div ng-show="loginForm.Email.$dirty&&loginForm.Password.$dirty&&isDisabled" class="am-text-danger">
+            用户已被禁用,请联系管理员
+         </div>
+		 </div>
+		 -->
+      </form>
+    </div>
+  </div>
+ {% endblock %}

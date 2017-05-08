@@ -1,0 +1,60 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li class="active"><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-panel am-panel-primary ng-cloak" ng-controller="IssueCreateCtrl" ng-init="Issue.ProjectId=((ProjectId))">
+    <div class="am-panel-hd"><i class="am-icon-plus"></i>创建新问题</div>
+    <div class="am-panel-bd">
+        <form role="form" name="createIssueForm">
+            <div class="am-alert am-alert-success am-alert-dismissable" ng-show="AddSuccess">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>创建新问题成功!</strong>
+            </div>
+            <div class="am-form-group">
+                <label>问题标题<span class="am-text-danger">*</span></label>
+                <input type="text" class="am-form-field" id="Subject" name="Subject" ng-model="Issue.Subject" placeholder="问题标题" required />
+                <div ng-show="createIssueForm.Subject.$dirty&&createIssueForm.Subject.$error.required" class="am-text-danger">请输入问题标题</div>
+            </div>
+            <div class="am-form-group">
+                <label>问题分类<span class="am-text-danger">*</span></label>
+                <select class="am-form-field" name="CategoryId" ng-model="Issue.CategoryId">
+                    <option value="-1">请选择</option>
+                    {% for category in Category %}
+                    <option value="((category.CategoryId))">((category.CategoryName))</option>
+                    {% endfor %}
+                </select>
+                <div ng-show="createIssueForm.CategoryId.$dirty&&Issue.CategoryId==-1" class="am-text-danger">请选择问题分类</div>
+            </div>
+            <div class="am-form-group">
+                <label>指派给<span class="am-text-danger">*</span></label>
+                <select class="am-form-field" ng-model="Issue.AssignTo">
+                    <option value="-1">我</option>
+                    {% for member in MemberList %}
+                    <option value="((member.UserId))">((member.Nick))</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="am-form-group">
+                <label>严重级别<span class="am-text-danger">*</span></label>
+                <select class="am-form-field" ng-model="Issue.Priority">
+                    <option value="1">高</option>
+                    <option value="2">中</option>
+                    <option value="3">低</option>
+                </select>
+            </div>
+            <div class="am-form-group">
+                <label>详细描述</label>
+                <script id="editor" type="text/plain">
+                </script>
+            </div>
+            <button type="button" id="btnCreate" class="am-btn am-btn-primary" ng-disabled="createIssueForm.$invalid||Issue.CategoryId==-1" data-loading-text="正在创建" ng-click="create()"><i class="fa fa-save fa-fw"></i>创建</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

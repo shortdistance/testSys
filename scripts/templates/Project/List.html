@@ -1,0 +1,208 @@
+﻿{% extends 'PowerTeamLayout.html' %}
+{% block navs %}
+{% if session['isadmin'] %}
+<li><a href="/Admin"><i class="am-icon-gear"></i>系统设置</a></li>
+{% endif %}
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+<div class="ng-cloak" ng-controller="ProjectCtrl" ng-init="query();">
+	<div class="am-u-sm-12 am-u-md-8 am-u-lg-8">
+		<div class="am-panel am-panel-primary">
+			<div class="am-panel-hd am-cf">我的项目</div>
+			<div class="am-panel-bd">
+				<form class="am-form am-form-inline" role="form">
+					 <div class="am-form-group">
+						{% if session['isadmin'] %}
+						<div class="am-form-group">
+							<a type="button" href="/Project/Create" class="am-btn am-btn-success" data-am-modal="{target: '#project_add', closeViaDimmer: 0, width: 400, height: 225}"><i class="am-icon-plus"></i> 新项目 </a>
+						</div>
+                        {% endif %}
+						<div class="am-form-group">
+							<input type="text" id="projectName" class="am-form-field" placeholder="项目名称" name="ProjectName" ng-model="ProjectQuery.ProjectName" />
+						</div>
+
+						<div class="am-form-group">
+							<select class="am-form-field" ng-model="ProjectQuery.Status">
+								<option value="-1"> 全部 </option>
+								<option value="1" selected="selected"> 进行中 </option>
+								<option value="2"> 已完成 </option>
+								<option value="3"> 已取消 </option>
+							</select>
+						</div>
+						
+						<div class="am-form-group">
+							<button type="button" ng-click="ProjectQuery.PageNo=1;query()" data-loading-text="正在查询" id="btnQuery" class="am-btn am-btn-primary"><i class="am-icon-search"></i> 查找项目 </button>
+						</div>
+
+					</div>
+				</form>
+				<div class="am-panel am-panel-primary">
+					<div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-my-project'}"><span class="am-icon-shopping-cart"></span> 我参与的项目<span class="am-badge am-badge-warning">{{ProjectQuery.RowCount}}</span></div>
+					<div class="am-panel-bd ng-cloak">
+						<div id="collapse-panel-my-project" class="am-in">
+							<div ng-repeat="Project in ProjectList">
+								<div class="row">
+									<div class="am-u-sm-12 am-u-md-4 am-u-lg-5 ng-cloak">
+										<span ng-switch on="Project.Status">
+											<strong class="label label-primary" ng-switch-when="1">高</strong>
+											<strong class="label label-success" ng-switch-when="2">中</strong>
+											<strong class="label label-warning" ng-switch-when="3">低</strong>
+										</span>
+										<a href="/Project/Dashboard/{{Project.ProjectId}}" >{{Project.ProjectName}}</a>
+									</div>
+									<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">	
+									{{Project.Creator}}
+									</div>
+									<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">	
+									{{ Project.CreateDate | date:'yyyy-MM-dd' }}
+									</div>
+									<div class="am-u-sm-12 am-u-md-4 am-u-lg-3 ng-cloak">	
+									<a href="/Project/Detail/{{Project.ProjectId}}" class="am-btn am-btn-default am-btn-xs"><i class="am-icon-edit"></i>编辑</a>
+									</div>										
+								</div>
+								<hr />
+							</div>
+							<div class="am-text-center" ng-show="ProjectQuery.RowCount>0">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="ProjectQuery.PageNo<=1?'btn disabled':''" ng-click="ProjectQuery.PageNo=ProjectQuery.PageNo-1;query()"><small>上一页</small></a></li>
+									<li><span><small>{{ProjectQuery.PageNo}}/{{ProjectQuery.PageCount}}</small></span></li>
+									<li><a href="#" ng-class="ProjectQuery.PageNo>=ProjectQuery.PageCount?'btn disabled':''" ng-click="ProjectQuery.PageNo=ProjectQuery.PageNo+1;query()"><small>下一页</small></a></li>
+								</ul>
+							</div>	
+						</div>			
+					</div>
+				</div>		
+				
+				<div class="am-panel am-panel-primary">
+					<div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-my-task'}"><span class="am-icon-shopping-cart"></span> 分配给我的任务<span class="am-badge am-badge-warning">{{TaskQuery.RowCount}}</span></div>
+					<div class="am-panel-bd ng-cloak">	
+						<div class="am-panel-bd ng-cloak">
+							<div id="collapse-panel-my-task" class="am-in">
+							<div ng-repeat="Task in TaskList">
+								<div class="row">
+                                    <div class="am-u-sm-12 am-u-md-2 am-u-lg-2">
+                                        <span class="am-icon-tasks am-text-primary"><a href="/Task/Detail/{{Task.ProjectId}}_{{Task.TaskId}}">{{Task.TaskId}}</a></span>
+                                    </div>
+									<div class="am-u-sm-12 am-u-md-5 am-u-lg-5 ng-cloak">
+										<span ng-switch on="Task.Priority" class="text-right">
+											<strong class="label label-danger" ng-switch-when="1">高</strong>
+											<strong class="label label-Primary" ng-switch-when="2">中</strong>
+											<strong class="label label-default" ng-switch-when="3">低</strong>
+										</span>
+										<span ng-switch on="Task.Status" class="text-right">
+											<strong class="label label-info" ng-switch-when="1">新创建</strong>
+											<strong class="label label-primary" ng-switch-when="2">进行中</strong>
+											<strong class="label label-success" ng-switch-when="3">已完成</strong>
+											<strong class="label label-default" ng-switch-when="4">已取消</strong>
+										</span>
+										<a href="/Task/Detail/{{Task.ProjectId}}_{{Task.TaskId}}">{{Task.TaskName | limitTo:48 }}</a>
+									</div>
+									<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">
+										<span ng-show="Task.TaskType==1" data-toggle="tooltip" title="类别: 默认"><i class="am-icon-h-square"></i> 默认</span>
+										<span ng-show="Task.TaskType==2" data-toggle="tooltip" title="类别: 测试-手动"><i class="am-icon-h-square"></i> 测试-手动</span>
+										<span ng-show="Task.TaskType==3" data-toggle="tooltip" title="类别: 测试-自动化"><i class="am-icon-h-square"></i> 测试-自动化</span>
+									</div>
+									<div class="am-u-sm-12 am-u-md-3 am-u-lg-3 ng-cloak">
+                                        开始于 {{Task.CreateDate | date:'yyyy-MM-dd HH:mm'}}
+                                    </div>
+								</div>
+								<div class="row">
+									<div class="am-u-sm-12 ng-cloak">
+										<div class="am-progress">
+											<div class="am-progress-bar am-progress-bar-primary" role="progressbar" aria-valuenow="{{Task.Progress}}" aria-valuemin="0" aria-valuemax="100" style="width:{{ Task.Progress; }}%">
+												<strong>{{Task.Progress}}%</strong>
+											</div>
+										</div>
+									</div>
+								</div>
+								<hr />
+							</div>
+
+							<div class="am-text-center" ng-show="TaskQuery.RowCount>0">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="TaskQuery.PageNo<=1?'btn disabled':''" ng-click="TaskQuery.PageNo=TaskQuery.PageNo-1;query()"><small>上一页</small></a></li>
+									<li><span><small>{{TaskQuery.PageNo}}/{{TaskQuery.PageCount}}</small></span></li>
+									<li><a href="#" ng-class="TaskQuery.PageNo>=TaskQuery.PageCount?'btn disabled':''" ng-click="TaskQuery.PageNo=TaskQuery.PageNo+1;query()"><small>下一页</small></a></li>
+								</ul>
+							</div>
+						</div>
+						</div>
+					</div>
+				</div>	
+
+				<div class="am-panel am-panel-primary">
+					<div class="am-panel-hd am-cf" data-am-collapse="{target: '#collapse-panel-my-bug'}"><span class="am-icon-shopping-cart"></span> 分配给我的问题<span class="am-badge am-badge-warning">{{IssueQuery.RowCount}}</span></div>
+					<div class="am-panel-bd ng-cloak">
+						<div id="collapse-panel-my-bug" class="am-in">
+							<div ng-repeat="Issue in IssueList">
+								<div class="row">
+                                    <div class="am-u-sm-12 am-u-md-2 am-u-lg-2">
+                                        <span class="am-icon-bug am-text-primary"><a href="/Issue/Detail/{{Issue.ProjectId}}_{{Issue.IssueId}}">{{Issue.IssueId}}</a></span>
+                                    </div>
+									<div class="am-u-sm-12 am-u-md-5 am-u-lg-5 ng-cloak">
+										<span ng-switch on="Issue.Priority">
+											<strong class="label label-danger" ng-switch-when="1">高</strong>
+											<strong class="label label-Primary" ng-switch-when="2">中</strong>
+											<strong class="label label-default" ng-switch-when="3">低</strong>
+										</span>
+										<span ng-switch on="Issue.Status">
+											<strong class="label label-info" ng-switch-when="1">新创建</strong>
+											<strong class="label label-success" ng-switch-when="2">已解决</strong>
+											<strong class="label label-default" ng-switch-when="3">已关闭</strong>
+											<strong class="label label-default" ng-switch-when="4">已取消</strong>
+										</span>
+                                        <a href="/Issue/Detail/{{Issue.ProjectId}}_{{Issue.IssueId}}">{{Issue.Subject|limitTo:48}}</a>
+									</div>
+									<div class="am-u-sm-12 am-u-md-2 am-u-lg-2 ng-cloak">
+										<span data-toggle="tooltip" title="问题分类 {{Issue.Category}}">{{Issue.Category}}</span>
+									</div>
+									<div class="am-u-sm-12 am-u-md-3 am-u-lg-3 ng-cloak">
+										更新于 {{Issue.LastUpdateDate | date:'yyyy-MM-dd HH:mm'}}
+									</div>
+								</div>
+								<hr />
+							</div>
+
+							<div class="am-text-center" ng-show="IssueQuery.RowCount>0">
+								<ul class="am-pagination am-pagination-default">
+									<li><a href="#" ng-class="IssueQuery.PageNo<=1?'btn disabled':''" ng-click="IssueQuery.PageNo=IssueQuery.PageNo-1;query()"><small>上一页</small></a></li>
+									<li><span><small>{{IssueQuery.PageNo}}/{{IssueQuery.PageCount}}</small></span></li>
+									<li><a href="#" ng-class="IssueQuery.PageNo>=IssueQuery.PageCount?'btn disabled':''" ng-click="IssueQuery.PageNo=IssueQuery.PageNo+1;query()"><small>下一页</small></a></li>
+								</ul>
+							</div>
+						</div>			
+					</div>
+				</div>	
+			</div>
+		</div>
+	</div>
+
+	<div class="am-u-sm-12 am-u-md-4 am-u-lg-4">	
+		<div class="am-panel am-panel-primary">
+			<div class="am-panel-hd am-cf"><span class="am-icon-shopping-cart"></span> 系统日志</div>
+			<div class="am-panel-bd ng-cloak">
+				<div id="collapse-panel-my-bug" class="am-in">
+					<table class="am-table am-table-striped am-table-hover table-main">
+						<thead></thead>
+						<tbody>
+							<tr ng-repeat="log in LogList">
+								<td class="am-u-sm-4 am-u-md-4 am-u-lg-4">{{log.CreateTime}}</td>
+								<td class="am-u-sm-8 am-u-md-8 am-u-lg-8" ng-bind-html="log.ActionDetail | trustHtml"></td>
+							</tr>
+						</tbody>
+					</table>
+					<div class="am-text-center" ng-show="LogQuery.RowCount>0">
+						<ul class="am-pagination am-pagination-default">
+							<li><a href="#" ng-class="LogQuery.PageNo<=1?'btn disabled':''" ng-click="LogQuery.PageNo=LogQuery.PageNo-1;query()"><small>上一页</small></a></li>
+							<li><span><small>{{LogQuery.PageNo}}/{{LogQuery.PageCount}}</small></span></li>
+							<li><a href="#" ng-class="LogQuery.PageNo>=LogQuery.PageCount?'btn disabled':''" ng-click="LogQuery.PageNo=LogQuery.PageNo+1;query()"><small>下一页</small></a></li>
+						</ul>
+					</div>
+				</div>			
+			</div>
+		</div>	
+	</div>
+</div>
+</div>
+{% endblock %}

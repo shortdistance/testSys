@@ -1,0 +1,358 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li><a href="/Project/Setting/((ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li class="active"><a href="/Project/Case/((ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((ProjectId))"><i class="am-icon-users"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-g" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+	<div class="am-panel am-panel-primary ng-cloak" ng-controller="ScriptCtrl" ng-init="CaseId='((CaseId))';UserId=((session['userid']));Query();">
+		<div class="am-panel-hd" ><!--data-am-collapse="{parent: '#accordion', target: '#Script_Info'}"-->
+			<i class="am-icon-plus"></i>脚本信息
+			<button class="am-btn am-btn-warning am-btn-xs" ng-click="RunScript();"><span class="am-icon-circle-o-notch"></span>执行</button>
+			<a type="button" class="am-btn am-btn-xs am-btn-default" href="/Case/Detail/((ProjectId))_((CaseId))" ><span class="am-icon-pencil-square-o"></span>返回</a>
+		</div>
+		<div id="Script_Info" ><!--class="am-panel-collapse am-collapse" >-->
+			<div class="am-panel-bd" >
+				<div data-am-sticky>
+				  <a href="#doc-oc-demo1" data-am-offcanvas><span class="am-badge am-badge-primary"><i class="am-icon-spinner am-icon-pulse"></i>点击显示侧边栏</span></a>
+				</div>
+				<!-- 侧边栏内容 -->
+				<div id="doc-oc-demo1" class="am-offcanvas">
+				  <div class="am-offcanvas-bar am-offcanvas-bar-flip">
+					<div class="am-offcanvas-content">
+						<div>
+							<form class="am-form" name="QueryForm" >
+								<fieldset>
+									<legend>表单标题</legend>
+									<div class="am-form-group">
+										<label>输入字符串:<span class="am-text-danger">*</span></label>
+										<input type="text" class="am-form-field" name="QueryString" ng-model="Query_String.Query_String" placeholder="查询字符串" required />
+										<div ng-show="QueryForm.QueryString.$dirty&&QueryForm.QueryString.$error.required" class="am-text-danger">请输入待查询字符串!!</div>
+									</div>
+									<button type="button" id="btnQuery" ng-disabled="QueryForm.$invalid" class="am-btn am-btn-xs am-btn-primary" data-loading-text="正在加载" ng-click="QueryString();"><i class="am-icon-search"></i>查询</button>
+								</fieldset>
+							</form>
+							<div>
+								<table class="am-table" ng-show="QuerySucc">
+									<tbody>
+										<tr>
+											<td><span class="am-badge am-badge-primary">步骤:</span></td>
+											<td>
+												<a class="am-text-left" ><span class="am-icon-btn am-icon-file-text am-text-warning">{{QueryRet.StepId}}</span></a>
+											</td>
+										</tr>
+										<tr>
+											<td><span class="am-badge am-badge-primary">建议操作:</span></td>
+											<td ng-switch on="QueryRet.OperType">
+												<strong class="label label-warning" ng-switch-when="1">输入参数变量化</strong>
+												<strong class="label label-danger" ng-switch-when="2">返回值变量绑定</strong>
+											</td>
+										</tr>
+									</tbody>
+								</table>				
+							</div>
+						</div>
+					</div>
+				  </div>
+				</div>		
+				
+				<!--参数化弹出框-->
+				<div class="am-popup" id="my-popup">
+					<div class="am-popup-inner">
+						<div class="am-popup-hd">
+						  <h4 class="am-popup-title" ng-show="ParamBindQuery.OperType==1">参数化</h4>
+						  <h4 class="am-popup-title" ng-show="ParamBindQuery.OperType==2">变量绑定</h4>
+						  <span data-am-modal-close class="am-close">&times;</span>
+						</div>
+						<div class="am-popup-bd">
+							<div class="am-alert am-alert-success am-alert-dismissable" ng-show="IsAddParamSucc==1">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								<strong>创建成功!</strong>
+							</div>
+							<div class="am-alert am-alert-danger am-alert-dismissable" ng-show="IsAddParamSucc==2">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								<strong>创建失败!</strong>
+							</div>
+							<form class="am-form" name="ParameterizeForm"  data-am-validator>
+							  <div class="am-g am-margin-top">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  参数名:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+								  <input type="text" id="BindParameterName" class="am-input-sm" ng-model="ParamBindQuery.ParameterName" ng-disabled="true">
+								</div>
+							  </div>
+							  <div class="am-g am-margin-top">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  参数原值:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+								  <input type="text" id="BindParameterValue" class="am-input-sm" ng-model="ParamBindQuery.ParameterValue" ng-disabled="true">
+								</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==1" >
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  新变量类型:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+									<select class="am-form-field" ng-model="ParamBindQuery.ParemeterTypeNew">
+										<option value="1">[1].字符串变量</option>
+										<option value="2">[2].时间戳</option>
+										<!--<option value="3">[3].时间戳</option>-->
+									</select>
+								</div>
+							  </div>
+							  <!-- 字符串变量-->
+							  <div>
+								  <div class="am-g am-margin-top">
+									<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+									  新变量名:
+									</div>
+									<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+										<input type="text" id="BingNewParameterName" class="am-input-sm" ng-model="ParamBindQuery.ParameterNameNew" ng-disabled="true">
+									</div>
+								  </div>
+										
+								  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==1">
+									<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+									  新变量值:
+									</div>
+									<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+									  <input type="text" id="BingNewParameterValue" class="am-input-sm" ng-model="ParamBindQuery.ParameterValueNew">
+									</div>
+								  </div>
+								</div>
+							  <div class="am-g am-margin-top">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  替换方式:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+									<select class="am-form-field" ng-model="ParamBindQuery.ReplaceWay">
+										<option value="1">[1].全量替换(替换所有步骤中出现的该值)</option>
+										<option value="2">[2].仅替换此项(只替换当前字段值)</option>
+									</select>
+								</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==2">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  &nbsp;
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+								  <button class="am-btn am-btn-primary am-btn-xs" id="btnShowCurrRetData" data-am-loading="{loadingText: '努力加载中...'}" ng-click="QueryBindParamRetData(currfield);">显示返回报文</button>
+								</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==2&&bindstep.RetDataShow">
+									<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+										所在步骤：
+									</div>
+									<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+										<span class="am-icon-file-text am-text-warning">{{bindstep.StepId}}</span>
+									</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==2&&bindstep.RetDataShow">
+									<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+										返回报文：
+									</div>
+									<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+											<textarea name="currStepRetData" id="currStepRetData" class="textarea" ng-model="bindstep.RetData" ng-disable></textarea>
+									</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==2&&bindstep.RetDataShow">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  左边界:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+									<input type="text" id="leftStr" class="am-input-sm" ng-model="ParamBindQuery.LefeStr">  	
+								</div>
+							  </div>
+							  <div class="am-g am-margin-top" ng-show="ParamBindQuery.OperType==2&&bindstep.RetDataShow">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  右边界:
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+									<input type="text" id="rightStr" class="am-input-sm" ng-model="ParamBindQuery.RightStr">  
+								</div>
+							  </div>       	
+							  <div class="am-g am-margin-top">
+								<div class="am-u-sm-3 am-u-md-3 am-u-lg-3 am-text-right">
+								  &nbsp;
+								</div>
+								<div class="am-u-sm-8 am-u-md-8 am-u-lg-8 am-u-end col-end">
+								  <button type="submit" class="am-btn am-btn-primary am-btn-xs" ng-disabled="createProjectForm.$invalid" ng-click="doParamSubmit();Query();" >提交</button>
+								</div>
+							  </div>
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<div ng-show="isExecuted">
+					<div class="am-panel am-panel-default">
+						<div class="am-panel-hd" data-am-collapse="{parent: '#accordion', target: '#resultInfo'}">
+							<table class="am-table">
+								<tr>
+									<td class="am-u-sm-5 am-u-md-5 am-u-lg-5"><a class="am-text-left lead" ><span class="am-icon-file-text am-text-warning">批次号:{{WaveId}}</span></a></td>
+									<td class="am-u-sm-4 am-u-md-4 am-u-lg-4" class="am-text-left">
+										执行结果:
+										<span ng-switch on="RunInfo.isPass">
+											<strong class="label label-success" ng-switch-when="true">成功</strong>
+											<strong class="label label-danger" ng-switch-when="false">失败</strong>
+										</span>
+									</td>
+									<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><a class="am-text-left"><strong>返回码:</strong>{{RunInfo.retCode}}</a></td>
+								</tr>
+							</table>
+						</div>				
+						<div id="resultInfo" class="am-panel-collapse am-collapse" >
+							<div class="am-panel-bd">
+								<table class="am-table am-table-striped">
+									<thead>
+										<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>StepId</strong></td>
+										<td class="am-u-sm-4 am-u-md-4 am-u-lg-4"><strong>Url</strong></td>
+										<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>方式</strong></td>
+										<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><strong>返回码</strong></td>
+										<td class="am-u-sm-3 am-u-md-3 am-u-lg-3"><strong>返回信息</strong></td>
+										<td class="am-u-sm-2 am-u-md-2 am-u-lg-2"><strong>执行时间</strong></td>
+									</thead>
+									<tbody>
+										<tr ng-repeat="hisstep in WaveInfo">
+											<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.StepId}}</td>
+											<td class="am-u-sm-4 am-u-md-4 am-u-lg-4" data-toggle="tooltip" title="URL: {{hisstep.Url}}">{{hisstep.Url | limitTo:64}}<a ng-show="hisstep.Url.length>64"><strong>...</strong></a></td>
+											<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Method}}</td>
+											<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">{{hisstep.Result}}</td>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result=='200'">{{hisstep.ResultMessage}}</td>
+											<td class="am-u-sm-3 am-u-md-3 am-u-lg-3" ng-show="hisstep.Result!='200'">{{RunInfo.retMsg}}</td>
+											<td class="am-u-sm-2 am-u-md-2 am-u-lg-2">{{hisstep.ExecuteSec}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>			
+	
+				<!--步骤列表-->
+				<div class="am-panel am-panel-default"  ng-repeat="step in StepList">
+					<div class="am-panel-hd" data-am-collapse="{parent: '#accordion', target: '#{{step.StepId}}'}">
+						<table class="am-table">
+							<tr>
+								<td class="am-u-sm-1 am-u-md-1 am-u-lg-1"><a class="am-text-left lead" id="stepid_{{step.StepId}}" ><span class="am-icon-file-text am-text-warning">{{step.StepId}}</span></a></td>
+								<td class="am-u-sm-1 am-u-md-1 am-u-lg-1" class="am-text-left">
+									<span ng-switch on="step.Method">
+										<strong class="label label-success" ng-switch-when="POST">{{step.Method}}</strong>
+										<strong class="label label-default" ng-switch-when="GET">{{step.Method}}</strong>
+									</span>	
+								</td>
+								<td class="am-u-sm-8 am-u-md-8 am-u-lg-8" data-toggle="tooltip" title="{{step.Url}}"><a class="am-text-left">{{ step.Url | limitTo : 128 }}</a></td>
+								<td class="am-u-sm-1 am-u-md-1 am-u-lg-1">
+									<i class="am-icon-plus"></i>展开
+								</td>
+							</tr>
+						</table>
+					</div>				
+					<div id="{{step.StepId}}" class="am-panel-collapse am-collapse" >
+						<div class="am-panel-bd">
+							<table class="am-table">
+								<tbody>
+									<tr>
+									  <td class="am-u-sm-2 am-u-md-2 am-u-lg-1 am-text-right"><strong>参数列表：</strong></td>
+									  <td class="am-u-sm-10 am-u-md-10 am-u-lg-11">
+											<table class="am-table">
+												<thead>
+													<tr>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><strong>参数名</strong></td>
+														<td class="am-u-md-1 am-u-lg-1 am-text-left"><strong>类型</strong></td>
+														<td class="am-u-md-3 am-u-lg-3 am-text-left"><strong>参数值</strong></td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><strong>操作</strong></td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><strong>分析和建议</strong></td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><strong>变量</strong></td>
+													</tr>
+												</thead>
+												<tbody>
+													<tr ng-repeat="field in step.Parameter" >
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><!--字段名-->
+															<strong>{{field.ParameterName}}</strong>
+														</td>
+														<td class="am-u-md-1 am-u-lg-1 am-text-left"><!--字段类型-->
+															<span ng-switch on="field.ParameterType">
+																<strong class="label label-success" ng-switch-when="PostData">Post</strong>
+																<strong class="label label-default" ng-switch-when="GetData">Get</strong>
+															</span>
+														</td>
+														<td class="am-u-md-3 am-u-lg-3 am-text-left"><!--字段值-->
+															{{field.ParameterValue}}
+														</td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left"><!--操作-->
+															<!--如果没有变量化，则显示按钮-->											
+															<div class="am-btn-group am-btn-group-xs" ng-show="!field.IsParamBind">
+																<div ng-show="field.QueryRet.StepId>0&&field.QueryRet.OperType==1">
+																	<button class="am-btn am-btn-success am-btn-xs" ng-click="doParamInit(step, field);">参数化</button>
+																</div>
+																<!--QueryRet = StepId=0, OperType=0, ParameterName='', BackStepId=0, BackParameterName=''-->
+																<div ng-show="field.QueryRet.StepId>0&&field.QueryRet.OperType==2">
+																	<button class="am-btn am-btn-secondary am-btn-xs" ng-click="doParamInit(step, field);">变量绑定</button>
+																	<button class="am-btn am-btn-success am-btn-xs" ng-show="field.QueryRet.BackStepId>0" ng-click="field.QueryRet.OperType=1;field.QueryRet.StepId=field.QueryRet.BackStepId;field.QueryRet.ParameterName=field.QueryRet.BackParameterName;doParamInit(step, field);">参数化</button>
+																</div>
+															<div>
+														</td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left" ><!--分析和建议-->
+															<div ng-show="!field.IsParamBind">
+																<div ng-show="field.QueryRet.StepId>0&&field.QueryRet.OperType==1">
+																	<span><strong class="label label-warning">参数化</strong></span>
+																	<a class="am-text-left" href="#stepid_{{field.QueryRet.StepId}}"><span class="am-icon-file-text am-text-warning">{{field.QueryRet.StepId}}</span></a>
+																	<a class="am-text-left"><span class="am-text-warning">{{field.QueryRet.ParameterName}}</span></a>
+																</div>
+																<div ng-show="field.QueryRet.StepId>0&&field.QueryRet.OperType==2">
+																	<span><strong class="label label-danger">变量绑定</strong></span>
+																	<a class="am-text-left" href="#stepid_{{field.QueryRet.StepId}}"><span class="am-icon-file-text am-text-danger">{{field.QueryRet.StepId}}</span></a>
+																	<hr />
+																	<span><strong class="label label-warning">参数化</strong></span>
+																	<a class="am-text-left" href="#stepid_{{field.QueryRet.BackStepId}}"><span class="am-icon-file-text am-text-warning">{{field.QueryRet.BackStepId}}</span></a>
+																	<a class="am-text-left"><span class="am-text-warning">{{field.QueryRet.BackParameterName}}</span></a>														
+																</div>
+															</div>											
+														</td>
+														<td class="am-u-md-2 am-u-lg-2 am-text-left" ><!--变量-->
+															<!--如果已经变量化了，则显示新变量名-->
+															<div ng-show="field.IsParamBind">
+																<span ng-switch on="field.ParamBind.OperType">
+																	<strong class="label label-warning" ng-switch-when="1">已参数化</strong>
+																	<strong class="label label-danger" ng-switch-when="2">已变量绑定</strong>
+																</span>
+																{{field.ParamBind.ParameterNameNew}}
+																<button type="button" class="am-close am-close-alt am-close-spin" ng-click="CancelParam(field);Query();">&times;</button>
+															</div>			
+														</td>
+													</tr>
+												</tbody>
+											</table>
+									  </td>
+									</tr>
+									<tr>
+										<td class="am-u-sm-2 am-u-md-2 am-u-lg-1 am-text-right"><strong>返回报文长度：(字节)</strong></td>
+										<td class="am-u-sm-10 am-u-md-10 am-u-lg-11 am-text-left">
+											{{step.RetDataSize}}
+										</td>
+									</tr>
+									<tr>
+										<td class="am-u-sm-2 am-u-md-2 am-u-lg-1 am-text-right"><strong>返回报文：</strong></td>
+										<td class="am-u-sm-10 am-u-md-10 am-u-lg-11 am-text-left">
+											<button class="am-btn am-btn-primary am-btn-xs" id="btnShowRetData" data-am-loading="{loadingText: '努力加载中...'}" ng-click="QueryRetData(step);">显示返回报文</button>
+											<hr />
+											<textarea name="RetData" id="RetData" rows="6"  cols="100" class="textarea" ng-show="step.RetDataShow" ng-model="step.RetData" ng-disable></textarea>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

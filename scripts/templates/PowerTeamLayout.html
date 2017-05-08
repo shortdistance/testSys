@@ -1,0 +1,46 @@
+﻿{% extends 'BaseLayout.html' %} 
+{% block content %}
+  <header class="am-topbar am-topbar-inverse admin-header">
+    <div class="am-topbar-brand">
+      <a href="/MyZone"><strong>TestSys</strong></a>
+      <small>测试管理平台 <span class="am-badge am-badge-warning">new</span></small>
+    </div>
+
+	<button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#topbar-collapse'}"><span class="am-sr-only">导航切换</span></button>
+    <div class="am-collapse am-topbar-collapse" id="topbar-collapse">
+	  
+	  <ul class="am-nav am-nav-pills am-topbar-nav admin-header-list">
+		{% block navs %}{% endblock %}
+	  </ul>
+      <ul class="am-nav am-nav-pills am-topbar-nav am-topbar-right admin-header-list">
+      <li class="am-dropdown" data-am-dropdown="">
+          <a class="am-dropdown-toggle" data-am-dropdown-toggle=""
+          href="javascript:;">((session['username']))</a>
+
+          <ul class="am-dropdown-content">
+            <li>
+              <a href="/Profile">修改信息</a>
+            </li>
+
+            <li>
+              <a href="/Profile">修改密码</a>
+            </li>
+
+            <li>
+              <a href="/SignOut">注销</a>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="/SignOut">注销</a>
+        </li>
+        <li class="am-hide-sm-only"><a href="javascript:;" id="admin-fullscreen"><span class="am-icon-arrows-alt"></span> <span class="admin-fullText">开启全屏</span></a></li>
+      </ul>
+    </div>
+  </header>
+  <br>
+  <div class="subcontent">
+    {% block subcontent %} {% endblock %}
+  </div>
+  {% endblock %}

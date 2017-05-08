@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html class="no-js" ng-app="TestSys">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title> 主机资源监控 </title>
+  <script src="/static/js/jquery-2.0.3.js"></script>
+  <script src="/static/js/highcharts.js"></script> 
+  <!--<script src="/static/js/angular.min.js"></script>-->
+  <script src="/static/js/TestSys.js"></script> 
+  <script type='text/javascript'>
+
+	$(function(){
+		  
+		function getData(){
+			    jQuery.getJSON('/Monitor/GetData', null, function(data) {
+
+					$('#cpu_container').highcharts({
+						  chart: {
+							  type: 'spline'
+						  },
+						  exporting:{
+								enabled: true 
+						  },
+						  title: {
+							  text: 'Idel CPU(%)'
+						  },
+						  
+						 legend:{
+								enabled:1,
+								layout: 'vertical',
+								align: 'right',
+								verticalAlign: 'middle',
+								borderWidth: 0
+							},	
+							
+						  xAxis: {
+						  },
+						  yAxis: {
+							  title: {
+								  text: 'Idel CPU(%)'
+							  },
+							 
+							  minorGridLineWidth: 0,
+							
+							  alternateGridColor: null,
+							 
+						  },
+						  tooltip: {
+							  
+						  },
+						  plotOptions: {
+							  spline: {
+								  lineWidth: 1,
+								  states: {
+									  hover: {
+										  lineWidth: 2
+									  }
+								  },
+								  marker: {
+									  enabled: false
+								  },
+								 
+							  }
+						  },
+						  series: data.cpuInfo,
+						  navigation: {
+							  menuItemStyle: {
+								  fontSize: '10px'
+							  }
+						  }
+					  });
+
+					$('#mem_container').highcharts({
+						  chart: {
+							  type: 'spline'
+						  },
+						  exporting:{
+								enabled: true 
+						  },
+						  title: {
+							  text: 'Free Mem(M)'
+						  },
+						  
+						 legend:{
+								enabled:1,
+								layout: 'vertical',
+								align: 'right',
+								verticalAlign: 'middle',
+								borderWidth: 0
+							},	
+							
+						  xAxis: {
+						  },
+						  yAxis: {
+							  title: {
+								  text: 'Free Mem(M)'
+							  },
+							 
+							  minorGridLineWidth: 0,
+							
+							  alternateGridColor: null,
+							 
+						  },
+						  tooltip: {
+							  
+						  },
+						  plotOptions: {
+							  spline: {
+								  lineWidth: 1,
+								  states: {
+									  hover: {
+										  lineWidth: 2
+									  }
+								  },
+								  marker: {
+									  enabled: false
+								  },
+								 
+							  }
+						  },
+						  series: data.memInfo,
+						  navigation: {
+							  menuItemStyle: {
+								  fontSize: '10px'
+							  }
+						  }
+					  });
+				
+				
+			});	
+		}
+
+		$(document).ready(function() {
+			//每隔3秒自动调用方法，实现图表的实时更新
+			window.setInterval(getData,5000); 
+			
+		});
+	});
+	</script>
+</head>
+<body>
+
+<!--<div class="ng-cloak" ng-controller="MonCtrl" ng-init="getData();">-->
+	<!--{{cpuInfo}}-->
+<div id="cpu_container" style="width:1200px;height:500px;margin:0 auto"></div>
+
+<div id="mem_container" style="width:1200px;height:500px;margin:0 auto"></div>
+<!--</div>-->
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+﻿{% extends 'PowerTeamLayout.html' %}
+{% block navs %}
+{% if session['isadmin'] %}
+<li><a href="/Admin"><i class="am-icon-gear"></i>系统设置</a></li>
+{% endif %}
+{% endblock %}
+{% block subcontent %}
+<div class="am-panel am-panel-primary ng-cloak" ng-controller="ProjectCtrl" ng-init="Task.ProjectId=((ProjectId))">
+    <div class="am-panel-hd"><i class="am-icon-plus"></i>创建新项目</div>
+    <div class="am-panel-bd">
+		<form role="form" name="createProjectForm"  data-am-validator>
+            <div class="am-alert am-alert-success am-alert-dismissable" ng-show="AddSuccess">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <strong>创建新项目成功!</strong>
+            </div>
+			<div class="am-form-group am-form-inline">
+				<label for="ProjectName">项目名称<span class="am-text-danger">*</span></label>
+				<input type="text" class="am-form-field" id="ProjectName" name="ProjectName" ng-model="Project.ProjectName" placeholder="项目名称" required minlength=5 maxlength=20 />
+			</div>
+			<div class="am-form-group am-form-inline">
+				<label for="ProjectName">项目前缀<span class="am-text-danger">*</span></label>
+				<input type="text" class="am-form-field" id="ProjectPrefix" name="ProjectPrefix" ng-model="Project.ProjectPrefix" placeholder="项目前缀" required minlength=2 maxlength=5 />
+			</div>
+			
+			<button type="button" id="btnCreateProject" ng-disabled="createProjectForm.$invalid" class="am-btn am-btn-primary  am-btn-xs" data-loading-text="正在创建" ng-click="create();"><i class="am-icon-save"></i>保存</button>
+
+		</form>
+    </div>
+</div>
+{% endblock %}

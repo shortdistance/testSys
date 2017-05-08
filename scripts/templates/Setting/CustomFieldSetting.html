@@ -1,0 +1,273 @@
+﻿{% extends 'PowerTeamLayout.html'%}
+{% block navs %}
+<li><a href="/Project/Dashboard/((Project.ProjectId))"><i class="am-icon-tachometer"></i>概览</a></li>
+<li class="active" ><a href="/Project/Setting/((Project.ProjectId))"><i class="am-icon-gear"></i>设置</a></li>
+<li><a href="/Project/Task/((Project.ProjectId))"><i class="am-icon-tasks"></i>任务</a></li>
+<li><a href="/Project/Case/((Project.ProjectId))"><i class="am-icon-suitcase"></i>用例</a></li>
+<li><a href="/Project/Issue/((Project.ProjectId))"><i class="am-icon-bug"></i>问题</a></li>
+<li><a href="/Project/Team/((Project.ProjectId))"><i class="am-icon-user"></i>团队</a></li>
+{% endblock %}
+{% block subcontent %}
+<div class="am-ng" style="-webkit-font-smoothing: subpixel-antialiased; -moz-osx-font-smoothing: auto">
+    <div class="am-u-sm-12 am-u-md-4 am-u-lg-2">
+		  <ul class="am-list">
+			<li><a href="/Project/Setting/((Project.ProjectId))"><span class="am-icon-gear"></span> 自定义字段设置 </a></li>
+		  </ul>
+    </div>
+    <div class="am-u-sm-12 am-u-md-8 am-u-lg-10">
+        <div class="am-panel am-panel-primary ng-cloak" ng-controller="CustomFieldCtrl" ng-init="Query.ProjectId=((Project.ProjectId));query()">
+            <div class="am-panel-hd am-cf"><i class="am-icon-gear"></i>自定义字段设置</div>
+            <div class="am-panel-bd">
+                <div class="alert alert-success alert-dismissable" ng-show="Success">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <strong>添加成功!</strong>
+                </div>
+                <div class="alert alert-warning alert-dismissable" ng-show="Exist">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <strong>分类已存在!</strong>
+                </div>
+                <form class="am-form" role="form" name="customfieldForm" data-am-validator>
+                    <div class="am-form-group">
+                        <div class="am-form-group">
+                            <label class="am-form-label">选择字段类别: </label>
+							  <select id="doc-select-1" ng-model="NewObjectType">
+								<option value="1">Bug-问题</option>
+								<option value="2">Case-用例</option>							
+							  </select>		                            
+                        </div>
+                        <div class="am-form-group">
+                            <label class="am-form-label">字段名: </label>
+                            <input type="text" class="am-form-field" placeholder="字段名" name="NewCustomField" ng-model="NewCustomField" maxlength="20" required />
+                        </div>						
+                        <div class="am-form-group">
+                            <button type="button" class="am-btn am-btn-primary" ng-disabled="customfieldForm.$invalid" ng-click="createField()"><i class="am-icon-user"></i>添加字段</button>
+                        </div>
+                    </div>
+                </form>
+				
+				<!--tabs start-->
+				<div class="am-tabs" data-am-tabs ng-show="!ShowUpdate">
+					<ul class="am-tabs-nav am-cf am-nav am-nav-tabs">
+					  <li><a href="#tab1">Bug-问题自定义字段<span class="am-badge am-badge-warning"> {{retBugList.length}}</span></a></li>
+					  <li><a href="#tab2">Case-用例自定义字段<span class="am-badge am-badge-warning">{{retCaseList.length}} </span></a></a></li>
+					  <!--<li><a href="#tab3">Task-任务自定义字段<span class="am-badge am-badge-warning">{{retTaskList.length}} </span></a></a></li> -->
+					</ul>
+
+					<div class="am-tabs-bd">
+						<div class="am-tab-panel am-fade am-in" id="tab1">
+							<div class="am-panel am-panel-default" >
+								<div class="am-panel-bd">
+									<form class="am-form" role="form" name="fieldvalueForm" data-am-validator>
+										<div class="am-form-group">
+											<div class="am-form-group">
+												<label class="am-form-label">选择字段名: </label>
+												 <select ng-options="bugCustomField.CustomFieldDesc for bugCustomField in retBugList" ng-model="SelectedFieldValue">
+												  </select>		                            
+											</div>
+											<div class="am-form-group">
+												<label class="am-form-label">字段值: </label>
+												<input type="text" class="am-form-field" placeholder="字段值" name="NewFieldValue" ng-model="NewFieldValue" maxlength="20" required />
+											</div>	
+
+											<div class="am-form-group">
+												<button type="button" class="am-btn am-btn-primary" ng-disabled="fieldvalueForm.$invalid" ng-click="createFieldValue()"><i class="am-icon-user"></i>添加字段值</button>
+											</div>
+										</div>
+									</form>
+
+								<table class="am-table">
+								  <thead>
+									  <tr>
+										<th>字段名</th>
+										<th>操作</th>
+										<th>字段值</th>
+									  </tr>
+								  </thead>
+								  <tbody>
+									<tr ng-repeat="bugCustomField in retBugList">
+									  <td>
+										<a ng-show="bugCustomField.Show">{{bugCustomField.CustomFieldDesc}}</a>
+										<input type="text" ng-model="MyNewField.CustomFieldDesc" ng-init="MyNewField.CustomFieldDesc=bugCustomField.CustomFieldDesc" ng-show="!bugCustomField.Show" maxlength="20" />
+										<!--<input type="text" ng-model="w" ng-init="w=bugCustomField.CustomFieldDesc" ng-value="{{bugCustomField.CustomFieldDesc}}" ng-show="!bugCustomField.Show" maxlength="20" />-->
+										<button type="button" class="am-btn am-btn-primary"  ng-show="!bugCustomField.Show" ng-click="saveFieldDesc(bugCustomField.CustomFieldId);bugCustomField.Show=!bugCustomField.Show"><i class="am-icon-save"></i>保存</button>
+									</td>
+									  <td>
+										<button class="am-btn am-btn-success am-btn-xs"  ng-click="bugCustomField.Show=!bugCustomField.Show;MyNewField.CustomFieldDesc=bugCustomField.CustomFieldDesc;" ><i class="am-icon-ban"></i>编辑</button>
+										<button class="am-btn am-btn-success am-btn-xs"  ng-click="enableField(bugCustomField.CustomFieldId)" ng-show="!bugCustomField.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+										<button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableField(bugCustomField.CustomFieldId)" ng-show="bugCustomField.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+										<button class="am-btn am-btn-danger am-btn-xs"   ng-click="delField(bugCustomField.CustomFieldId)" ng-show="!bugCustomField.IsEnabled"><i class="am-icon-recycle"></i>删除</button>							  
+									  </td>
+									  <td>
+										<table class="am-table">
+											<tbody>
+												<tr ng-repeat="fieldvalue in bugCustomField.CustomValueList track by $index">
+												  <td>
+													<a ng-show="fieldvalue.Show">{{fieldvalue.FieldValue}}</a>
+													<input type="text" ng-model="MyNewFieldValue.FieldValue" ng-init="MyNewFieldValue.FieldValue=fieldvalue.FieldValue" ng-show="!fieldvalue.Show" maxlength="20" />
+													<button type="button" class="am-btn am-btn-primary"  ng-show="!fieldvalue.Show" ng-click="saveFieldValue(fieldvalue.CustomFieldValueId);fieldvalue.Show=!fieldvalue.Show"><i class="am-icon-save"></i>保存</button>									
+																
+												  </td>
+												  <td>
+													  <button class="am-btn am-btn-success am-btn-xs"  ng-click="fieldvalue.Show=!fieldvalue.Show;MyNewFieldValue.FieldValue=fieldvalue.FieldValue;" ><i class="am-icon-ban"></i>编辑</button>
+													  <button class="am-btn am-btn-success am-btn-xs"  ng-click="enableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+													  <button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="fieldvalue.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+													  <button class="am-btn am-btn-danger am-btn-xs"   ng-click="delFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-recycle"></i>删除</button>
+												  </td>
+												</tr>
+											</tbody>
+										</table>							
+									  </td>
+									</tr>
+								   </tbody>
+								</table>	
+								</div>
+							</div>
+						</div>
+					  
+						<div class="am-tab-panel am-fade am-in" id="tab2">
+							<div class="am-panel am-panel-default" >
+								<div class="am-panel-bd">
+									<form class="am-form" role="form" name="fieldvalueForm" data-am-validator>
+										<div class="am-form-group">
+											<div class="am-form-group">
+												<label class="am-form-label">选择字段名: </label>
+												 <select ng-options="caseCustomField.CustomFieldDesc for caseCustomField in retCaseList" ng-model="SelectedFieldValue">
+												  </select>		                            
+											</div>
+											<div class="am-form-group">
+												<label class="am-form-label">字段值: </label>
+												<input type="text" class="am-form-field" placeholder="字段值" name="NewFieldValue" ng-model="NewFieldValue" maxlength="20" required />
+											</div>	
+
+											<div class="am-form-group">
+												<button type="button" class="am-btn am-btn-primary" ng-disabled="fieldvalueForm.$invalid" ng-click="createFieldValue()"><i class="am-icon-user"></i>添加字段值</button>
+											</div>
+										</div>
+									</form>
+
+								<table class="am-table">
+								  <thead>
+									  <tr>
+										<th>字段名</th>
+										<th>操作</th>
+										<th>字段值</th>
+									  </tr>
+								  </thead>
+								  <tbody>
+									<tr ng-repeat="caseCustomField in retCaseList">
+									  <td>
+										<a ng-show="caseCustomField.Show">{{caseCustomField.CustomFieldDesc}}</a>
+										<input type="text" ng-model="MyNewField.CustomFieldDesc" ng-init="MyNewField.CustomFieldDesc=caseCustomField.CustomFieldDesc" ng-show="!caseCustomField.Show" maxlength="20" />
+										<!--<input type="text" ng-model="w" ng-init="w=caseCustomField.CustomFieldDesc" ng-value="{{caseCustomField.CustomFieldDesc}}" ng-show="!caseCustomField.Show" maxlength="20" />-->
+										<button type="button" class="am-btn am-btn-primary"  ng-show="!caseCustomField.Show" ng-click="saveFieldDesc(caseCustomField.CustomFieldId);caseCustomField.Show=!caseCustomField.Show"><i class="am-icon-save"></i>保存</button>
+									</td>
+									  <td>
+										<button class="am-btn am-btn-success am-btn-xs"  ng-click="caseCustomField.Show=!caseCustomField.Show;MyNewField.CustomFieldDesc=caseCustomField.CustomFieldDesc;" ><i class="am-icon-ban"></i>编辑</button>
+										<button class="am-btn am-btn-success am-btn-xs"  ng-click="enableField(caseCustomField.CustomFieldId)" ng-show="!caseCustomField.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+										<button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableField(caseCustomField.CustomFieldId)" ng-show="caseCustomField.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+										<button class="am-btn am-btn-danger am-btn-xs"   ng-click="delField(caseCustomField.CustomFieldId)" ng-show="!caseCustomField.IsEnabled"><i class="am-icon-recycle"></i>删除</button>							  
+									  </td>
+									  <td>
+										<table class="am-table">
+											<tbody>
+												<tr ng-repeat="fieldvalue in caseCustomField.CustomValueList track by $index">
+												  <td>
+													<a ng-show="fieldvalue.Show">{{fieldvalue.FieldValue}}</a>
+													<input type="text" ng-model="MyNewFieldValue.FieldValue" ng-init="MyNewFieldValue.FieldValue=fieldvalue.FieldValue" ng-show="!fieldvalue.Show" maxlength="20" />
+													<button type="button" class="am-btn am-btn-primary"  ng-show="!fieldvalue.Show" ng-click="saveFieldValue(fieldvalue.CustomFieldValueId);fieldvalue.Show=!fieldvalue.Show"><i class="am-icon-save"></i>保存</button>									
+																
+												  </td>
+												  <td>
+													  <button class="am-btn am-btn-success am-btn-xs"  ng-click="fieldvalue.Show=!fieldvalue.Show;MyNewFieldValue.FieldValue=fieldvalue.FieldValue;" ><i class="am-icon-ban"></i>编辑</button>
+													  <button class="am-btn am-btn-success am-btn-xs"  ng-click="enableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+													  <button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="fieldvalue.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+													  <button class="am-btn am-btn-danger am-btn-xs"   ng-click="delFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-recycle"></i>删除</button>
+												  </td>
+												</tr>
+											</tbody>
+										</table>							
+									  </td>
+									</tr>
+								   </tbody>
+								</table>	
+								</div>
+							</div>
+						</div>
+						
+						<!--
+						<div class="am-tab-panel am-fade am-in" id="tab3">
+							<div class="am-panel am-panel-default" >
+								<div class="am-panel-bd">
+									<form class="am-form" role="form" name="fieldvalueForm" data-am-validator>
+										<div class="am-form-group">
+											<div class="am-form-group">
+												<label class="am-form-label">选择字段名: </label>
+												 <select ng-options="taskCustomField.CustomFieldDesc for taskCustomField in retTaskList" ng-model="SelectedFieldValue">
+												  </select>		                            
+											</div>
+											<div class="am-form-group">
+												<label class="am-form-label">字段值: </label>
+												<input type="text" class="am-form-field" placeholder="字段值" name="NewFieldValue" ng-model="NewFieldValue" maxlength="20" required />
+											</div>	
+
+											<div class="am-form-group">
+												<button type="button" class="am-btn am-btn-primary" ng-disabled="fieldvalueForm.$invalid" ng-click="createFieldValue()"><i class="am-icon-user"></i>添加字段值</button>
+											</div>
+										</div>
+									</form>
+
+									<table class="am-table">
+									  <thead>
+										  <tr>
+											<th>字段名</th>
+											<th>操作</th>
+											<th>字段值</th>
+										  </tr>
+									  </thead>
+									  <tbody>
+										<tr ng-repeat="taskCustomField in retTaskList">
+										  <td>
+											<a ng-show="taskCustomField.Show">{{taskCustomField.CustomFieldDesc}}</a>
+											<input type="text" ng-model="MyNewField.CustomFieldDesc" ng-init="MyNewField.CustomFieldDesc=taskCustomField.CustomFieldDesc" ng-show="!taskCustomField.Show" maxlength="20" />
+											<button type="button" class="am-btn am-btn-primary"  ng-show="!taskCustomField.Show" ng-click="saveFieldDesc(taskCustomField.CustomFieldId);taskCustomField.Show=!taskCustomField.Show"><i class="am-icon-save"></i>保存</button>
+										</td>
+										  <td>
+											<button class="am-btn am-btn-success am-btn-xs"  ng-click="taskCustomField.Show=!taskCustomField.Show;MyNewField.CustomFieldDesc=taskCustomField.CustomFieldDesc;" ><i class="am-icon-ban"></i>编辑</button>
+											<button class="am-btn am-btn-success am-btn-xs"  ng-click="enableField(taskCustomField.CustomFieldId)" ng-show="!taskCustomField.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+											<button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableField(taskCustomField.CustomFieldId)" ng-show="taskCustomField.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+											<button class="am-btn am-btn-danger am-btn-xs"   ng-click="delField(taskCustomField.CustomFieldId)" ng-show="!taskCustomField.IsEnabled"><i class="am-icon-recycle"></i>删除</button>							  
+										  </td>
+										  <td>
+											<table class="am-table">
+												<tbody>
+													<tr ng-repeat="fieldvalue in taskCustomField.CustomValueList track by $index">
+													  <td>
+														<a ng-show="fieldvalue.Show">{{fieldvalue.FieldValue}}</a>
+														<input type="text" ng-model="MyNewFieldValue.FieldValue" ng-init="MyNewFieldValue.FieldValue=fieldvalue.FieldValue" ng-show="!fieldvalue.Show" maxlength="20" />
+														<button type="button" class="am-btn am-btn-primary"  ng-show="!fieldvalue.Show" ng-click="saveFieldValue(fieldvalue.CustomFieldValueId);fieldvalue.Show=!fieldvalue.Show"><i class="am-icon-save"></i>保存</button>									
+																	
+													  </td>
+													  <td>
+														  <button class="am-btn am-btn-success am-btn-xs"  ng-click="fieldvalue.Show=!fieldvalue.Show;MyNewFieldValue.FieldValue=fieldvalue.FieldValue;" ><i class="am-icon-ban"></i>编辑</button>
+														  <button class="am-btn am-btn-success am-btn-xs"  ng-click="enableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-edit"></i>启用</button>
+														  <button class="am-btn am-btn-warning am-btn-xs"  ng-click="disableFieldValue(fieldvalue.CustomFieldValueId)" ng-show="fieldvalue.IsEnabled"><i class="am-icon-ban"></i>禁用</button>
+														  <button class="am-btn am-btn-danger am-btn-xs"   ng-click="delFieldValue(fieldvalue.CustomFieldValueId)" ng-show="!fieldvalue.IsEnabled"><i class="am-icon-recycle"></i>删除</button>
+													  </td>
+													</tr>
+												</tbody>
+											</table>							
+										  </td>
+										</tr>
+									   </tbody>
+									</table>	
+								</div>
+							</div>  
+						</div>
+						-->
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
